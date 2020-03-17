@@ -1,0 +1,26 @@
+{
+  "name": "Holon",
+  "short_name": "Holon",
+  "start_url": "./",
+  "background_color": "aliceblue",
+  "theme_color": "aliceblue",
+  "description": "Holon !",
+  "display": "fullscreen",
+  "orientation": "portrait-primary",
+  "related_applications": [{
+    "platform": "web",
+    "url": "https://scenaristeur.github.io/holon/"
+    }],
+    "icons": [
+      {
+        "src": "favicon.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      }
+    ],
+    "permissions": {
+      "desktop-notification": {
+        "description": "Needed for creating system notifications."
+      }
+    }
+  }
