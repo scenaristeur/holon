@@ -48,34 +48,21 @@ class ShexFormElement extends LitElement {
 
 
     const getShape = (shape) => html `
-    GETSHAPE ${shape.url} <br>
-
-
-      <form  id ="${shape.url}" class="flow-text" ?hidden=${this.isHidden(shape.url)}>
-         <legend> <h2> ${this.localName(shape.url)} </h2></legend>
+    <div class="container">
+    <form  id ="${shape.url}" class="flow-text" ?hidden=${this.isHidden(shape.url)}>
+    <legend> <h2> ${this.localName(shape.url)} </h2></legend>
     ${getConstraint(shape.constraint)}
-    ${shape.style == "regular"
-    ? html `<br><paper-button
-    class="waves-effect waves-light btn-large"
-    type="submit"
-    @click="${(e) =>this.submitForm()}"
-    raised >
-    Submit ${this.localName(shape.url)}
-    <i class="material-icons right">send</i>
-    </paper-button>`
-    : html `<br><paper-button
-    class="waves-effect waves-light btn-large"
-    type="submit"
-    @click="${(e) =>this.displayForm(shape.url.replace('_Footprint', ''))}"
-    raised >
-    <i class="material-icons left">arrow_back</i>
-    Back to ${this.localName(shape.url.replace('_Footprint', ''))} Form</paper-button>`}
-
+    ${shape.style == "regular" ?
+    html `<button type="button" class="btn btn-primary" @click="${(e) =>this.submitForm()}">
+    <i class="far fa-save"></i> Save ${this.localName(shape.url)}
+    </button>`
+    : html `<br>
+    <button type="button" class="btn btn-primary" @click="${(e) =>this.displayForm(shape.url.replace('_Footprint', ''))}">
+    <i class="fas fa-backward"></i> Back to ${this.localName(shape.url.replace('_Footprint', ''))} Form
+    </button>`}
     </form>
+    </div>
     `
-
-
-
 
     const getConstraint = (constraint) => html`
     ${constraint.type ?
@@ -101,7 +88,9 @@ class ShexFormElement extends LitElement {
       : html``
     }
     ${constraint.predicate
-      ? html`<label class="flow-text" title="${this.toText(constraint)}">${this.setLastPredicate(constraint.predicate)}</label>`
+      ? html`
+      <label  title="${this.toText(constraint)}">
+      ${this.setLastPredicate(constraint.predicate)}</label>`
       : html``
     }
     ${constraint.valueExpr
@@ -111,7 +100,7 @@ class ShexFormElement extends LitElement {
     ${constraint.datatype
       ? html`${constraint.datatype.endsWith("date")
       ? html `<!--<small>${constraint.datatype}</small><br>-->
-      <input type="date" class="teal lighten-5"
+      <input type="date" class="form-control"
       title="${constraint.datatype}"
       name="${this.getLastPredicate()}"
       valueof="${this.getUuid()}"
@@ -119,7 +108,7 @@ class ShexFormElement extends LitElement {
       ></input>`
       : html `
       <!--<small>${constraint.datatype}</small><br>-->
-      <input type="text" class="validate teal lighten-5"
+      <input type="text" class="form-control"
       title="${constraint.datatype}"
       label="${constraint.datatype}"
       name="${this.getLastPredicate()}"
@@ -141,7 +130,7 @@ class ShexFormElement extends LitElement {
         ? html `<!--<span>${key}: ${shapeExp[key]}<br></span>-->`
         : html `<p>
         <label class="flow-text">
-        <input class="with-gap teal lighten-5"
+        <input class="form-control"
         id="${this.setUuid()}"
         title="${shapeExp}"
         name="${this.getLastPredicate()}"
@@ -170,7 +159,7 @@ class ShexFormElement extends LitElement {
 }
 ${constraint.nodeKind
   ? html`<input
-  type="text" class="validate teal lighten-5"
+  type="text" class="form-control"
   title="${constraint.nodeKind}"
   placeholder="${constraint.nodeKind}"
   name="${this.getLastPredicate()}"
@@ -195,6 +184,7 @@ ${constraint.reference
   @change=${this.selectorChange}
   @select-event="${(e) => { this.changeValue(e, "mySelect") }}" >
   <select id="mySelect" slot="mySelect"
+  class="custom-select"
   name="${this.getLastPredicate()}"
   @change=${this.selectorChange}>
   </select>
@@ -202,18 +192,18 @@ ${constraint.reference
   <a href="${constraint.reference}"
   title="See existing ${this.localName(constraint.reference)} at ${constraint.reference}"
   target="blank">
-  <i class="material-icons left teal-text lighten-5">visibility</i>
+  <i class="far fa-eye"></i> View
   </a>
   <a href="#"
   title="Create a ${constraint.reference}"
   @click="${(e) =>this.displayForm(constraint.reference)}">
-  <i class="material-icons left teal-text lighten-5">create</i>
+  <i class="fas fa-plus-circle"></i> Create
   </a>
   <br>  `
   : html``
 }
 ${constraint.values
-  ? html`<select class="teal lighten-5"
+  ? html`<select class="custom-select"
   @change="${this.selectorChange}"
   valueof="${this.getUuid()}"
   title="${this.toText(constraint)}"
@@ -237,7 +227,7 @@ ${constraint.values
   <link href="css/fontawesome/css/all.css" rel="stylesheet">
   <div class="container"
 
-    <div class="section" id="forms_section">
+  <div class="section" id="forms_section">
   <h5>Forms</h5>
   <div  class="row">
   ${this.shapes.map(i => html`
@@ -264,7 +254,7 @@ ${this.currentShape.url}
 ${this.shapes.map(shape => html`
   ${getShape(shape)}
   `)}
-   <shexy-formatter
+  <shexy-formatter
   name="${this.currentShape}"
   .shape="${this.currentShape}"
   .data="${this.data}"
@@ -277,10 +267,10 @@ ${this.shapes.map(shape => html`
   ${this.shapes.map(i => html`
     ${i.style == "footprint"
     ? html `
-    <div  class="card-panel hoverable col s12 m6 l3 teal lighten-5">
-    <p title=${i.url} @click="${(e) =>this.panelClicked(i)}">
-    ${this.localName(i.url)}</p>
-    </div>`
+    <button type="button"
+    class="btn btn-primary"
+     title=${i.url}
+      @click="${(e) =>this.panelClicked(i)}"> ${this.localName(i.url)}</button>`
     : html ``
   }`
 )}

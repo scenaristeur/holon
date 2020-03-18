@@ -54,10 +54,12 @@ class NavElement extends LitElement {
     </style>
     <h4>${this.something}</h4>
     <div class="navbar">
-    <button type="button" class="btn btn-primary" name="role" @click="${this.menuChanged}">Role <i name="role" class="fas fa-users"></i></button>
-        <button type="button" class="btn btn-primary" name="circle" @click=${this.menuChanged}>Cercle <i name="circle" class="fas fa-map-marked-alt"></i></button>
-        <button type="button" class="btn btn-primary" name="governance" @click="${this.menuChanged}">Gouvernance <i name="governance" class="fas fa-users"></i></button>
-        <button type="button" class="btn btn-primary" name="operationnel" disabled @click="${this.menuChanged}">Operationnel<i name="operationnel" class="fas fa-users"></i></button>
+    <button type="button" class="btn btn-primary" name="tension" @click="${this.menuChanged}">Tension <i name="tension" class="fas fa-bolt"></i></button>
+
+    <button type="button" class="btn btn-primary" name="role" @click="${this.menuChanged}">Role <i name="role" class="fas fa-hat-cowboy-side"></i></button>
+        <button type="button" class="btn btn-primary" name="circle" @click=${this.menuChanged}>Cercle <i name="circle" class="fas fa-users"></i></button>
+        <button type="button" class="btn btn-primary" name="governance" @click="${this.menuChanged}">Gouvernance <i name="governance" class="far fa-handshake"></i></button>
+        <button type="button" class="btn btn-primary" name="operationnel" disabled @click="${this.menuChanged}">Operationnel <i name="operationnel" class="fab fa-think-peaks"></i></button>
         <a href="https://igipartners.com/constitution-holacracy" target="_blank"  class="btn btn-sm btn-primary" name="operationnel" @click="${this.menuChanged}">Constitution</a>
 
 

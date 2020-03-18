@@ -5,19 +5,22 @@ import * as auth from 'solid-auth-client';
 
 class ShexySolid extends LitElement {
   static get properties() {
-    return { name: { type: String },
-    ttl: { type: Object} };
+    return {
+      name: { type: String },
+      ttl: { type: Object}
+    };
   }
 
   constructor() {
     super();
     this.name = 'World';
-    this.fileClient = SolidFileClient;
+    this.fileClient = new SolidFileClient(auth)
+    this.ttl = {}
+    this.ttl.shape = {url:""}
   }
 
   render() {
     return html`
-    <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
 
     <p>Hello, ${this.name}!</p>
     <p>Shape : ${this.ttl.shape.url}</p>
@@ -57,7 +60,7 @@ class ShexySolid extends LitElement {
       //    var loggedElements =  document.querySelectorAll(".logged")
       //    var sessionDiv =  document.getElementById("solid-session")
 
-      this.fileClient.checkSession().then(
+      auth.currentSession().then(
         session => {
           console.log("Logged in as "+session.webId)
           /*  var logged = "Logged in as "+session.webId
@@ -125,7 +128,7 @@ makeFile(){
   var url = root+path+"/"+this.ttl.filename;*/
   var fileUrl = this.ttl.shape.url+"/"+this.ttl.filename
   console.log(fileUrl)
-
+  console.log(this.fileClient)
   this.fileClient.createFile(fileUrl, this.ttl.content, "text/turtle").then( fileCreated => {
     /*  result.status = "created"
     result.file = fileCreated
@@ -184,7 +187,7 @@ class SolidFolders extends LitElement {
   constructor() {
     super();
     this.url = 'World';
-    this.fileClient  = new SolidFileClient(auth)
+    this.fileClient = new SolidFileClient(auth)
     this.folder = {}
     this.folder.name = "test folder name"
   }
@@ -323,15 +326,13 @@ class SolidLogin extends LitElement {
 
   constructor() {
     super();
-    this.fileClient = SolidFileClient;
+      this.fileClient = new SolidFileClient(auth)
     this.logged = false;
     this.webId = ""
   }
 
   render() {
     return html`
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
     <div class="right">
     <a href="#" title="LOGIN" @click="${(e) =>this.solidCheckSession()}">
     ${this.webId.length> 0
@@ -355,7 +356,11 @@ class SolidLogin extends LitElement {
 
 
   solidCheckSession(){
-    this.fileClient.checkSession().then(
+    //let session = await
+
+
+
+    auth.currentSession().then(
       session => {
         console.log("Logged in as "+session.webId)
         this.logout()
@@ -367,6 +372,8 @@ class SolidLogin extends LitElement {
         return false;
       }
     );
+
+
   }
 
 
@@ -405,7 +412,7 @@ shouldUpdate(changedProperties) {
 
 firstUpdated(){
 
-  this.fileClient.checkSession().then(
+  auth.currentSession().then(
     session => {
       console.log("Logged in as "+session.webId)
       this.webId = session.webId

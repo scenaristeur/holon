@@ -1,29 +1,28 @@
 import { LitElement, html } from 'lit-element';
 import { HelloAgent } from './agents/hello-agent.js';
-import './main-element.js'
-import './nav-element.js'
-import './login-element.js'
 
-class AppElement extends LitElement {
+class SolidWriteElement extends LitElement {
 
   static get properties() {
     return {
       name: {type: String},
       something: {type: String},
+      ttl: {type: Object}
     };
   }
 
   constructor() {
     super();
-    this.something = "App Element"
+    this.something = "Solid Write Element"
+    this.ttl = {}
   }
 
   render(){
     return html`
     <h4>${this.something}</h4>
-    <login-element name="Login">Loading...</login-element>
-    <main-element name="Main">Loading...</main-element>
-    <nav-element name="Nav" destinataire="Main">Loading...</nav-element>
+    ${this.ttl.filename} :
+    ${this.ttl.content}
+    to do, need help, see <a href="https://github.com/scenaristeur/holon">https://github.com/scenaristeur/holon</a>
 
     `;
   }
@@ -40,6 +39,9 @@ class AppElement extends LitElement {
           case "webIdChanged":
           app.webIdChanged(message.webId)
           break;
+          case "ttlChanged":
+          app.ttlChanged(message.ttl)
+          break;
           default:
           console.log("Unknown action ",message)
         }
@@ -47,10 +49,15 @@ class AppElement extends LitElement {
     };
   }
 
+  ttlChanged(ttl){
+    this.ttl = ttl
+    console.log(this.ttl)
+  }
+
   webIdChanged(webId){
     this.webId = webId
     if (webId != null){
-      this.updateProfile();
+      //  this.updateProfile();
     }else{
 
     }
@@ -58,4 +65,4 @@ class AppElement extends LitElement {
 
 }
 
-customElements.define('app-element', AppElement);
+customElements.define('solid-write-element', SolidWriteElement);
