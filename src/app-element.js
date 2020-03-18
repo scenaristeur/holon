@@ -1,5 +1,7 @@
 import { LitElement, html } from 'lit-element';
 import { HelloAgent } from './agents/hello-agent.js';
+import './main-element.js'
+import './nav-element.js'
 
 class AppElement extends LitElement {
 
@@ -18,6 +20,8 @@ class AppElement extends LitElement {
   render(){
     return html`
     <h4>${this.something}</h4>
+    <main-element name="Main">Loading...</main-element>
+    <nav-element name="Nav" destinataire="Main">Loading...</nav-element>
 
     `;
   }

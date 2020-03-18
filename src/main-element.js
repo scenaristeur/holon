@@ -1,23 +1,28 @@
 import { LitElement, html } from 'lit-element';
 import { HelloAgent } from './agents/hello-agent.js';
+import './shex-form-element.js'
 
-class ModeleAgentElement extends LitElement {
+class MainElement extends LitElement {
 
   static get properties() {
     return {
       name: {type: String},
       something: {type: String},
+      panel: {type: String}
     };
   }
 
   constructor() {
     super();
-    this.something = "Modele Element"
+    this.something = "Main Element"
+    this.panel = ""
   }
 
   render(){
     return html`
     <h4>${this.something}</h4>
+    ${this.panel}<br>
+  On  <shex-form-element name="ShexForm">Loading...</shex-form-element> h <br>
     to do, need help, see <a href="https://github.com/scenaristeur/holon">https://github.com/scenaristeur/holon</a>
 
     `;
@@ -35,11 +40,20 @@ class ModeleAgentElement extends LitElement {
           case "webIdChanged":
           app.webIdChanged(message.webId)
           break;
+          case "menuChanged":
+          app.menuChanged(message.menu)
+          break;
           default:
           console.log("Unknown action ",message)
         }
       }
     };
+  }
+
+  menuChanged(menu){
+    this.panel = menu
+    this.shape_url = "https://holacratie.solid.community/public/Schema/"+menu+".shex"
+    this.agent.send("ShexForm", {action: "shapeUrlChanged", shape_url: this.shape_url})
   }
 
   webIdChanged(webId){
@@ -53,4 +67,4 @@ class ModeleAgentElement extends LitElement {
 
 }
 
-customElements.define('modele-agent-element', ModeleAgentElement);
+customElements.define('main-element', MainElement);
