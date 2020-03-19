@@ -16,18 +16,19 @@ class MainElement extends LitElement {
     super();
     this.something = "Main Element"
     this.panel = ""
+
   }
 
   render(){
     return html`
     <h4>${this.something}</h4>
     ${this.panel}<br>
-  On  <shex-form-element name="ShexForm">Loading...</shex-form-element> h <br>
-    to do, need help, see <a href="https://github.com/scenaristeur/holon">https://github.com/scenaristeur/holon</a>
-<br>
-<br>
-<br>
-<br>
+
+    <shex-form-element name="ShexForm">Loading...</shex-form-element>
+    <br>
+    <br>
+    <br>
+    <br>
     `;
   }
 
@@ -62,11 +63,13 @@ class MainElement extends LitElement {
   webIdChanged(webId){
     this.webId = webId
     if (webId != null){
-      this.updateProfile();
+    //  this.updateProfile();
     }else{
 
     }
   }
+
+
 
 }
 

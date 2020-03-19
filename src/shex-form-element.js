@@ -21,7 +21,7 @@ class ShexFormElement extends LitElement {
   constructor() {
     super();
     this.something = "ShexFormElement"
-    this.shape_url = "fill a shape_url attribute"
+    this.shape_url = ""
     this.shex = ShEx;
     this.shapes = []
     console.log(this.shex)
@@ -225,59 +225,73 @@ ${constraint.values
   return html`
   <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" >
   <link href="css/fontawesome/css/all.css" rel="stylesheet">
-  <div class="container"
+  <div class="container">
 
-  <div class="section" id="forms_section">
-  <h5>Forms</h5>
-  <div  class="row">
-  ${this.shapes.map(i => html`
-    ${i.style == "regular"
-    ? html `
-    <button type="button" class="btn btn-primary" @click="${(e) =>this.panelClicked(i)}">
-    ${this.localName(i.url)}
-    </button>`
-    :html ``
-  }`
-)}
-</div>
-</div>
 
-<div class="divider" id="top_Form"></div>
-<div >
-<button type="button" class="btn btn-primary" @click="${(e) =>this.focus("forms_section")}">Forms</button>
-<button type="button" class="btn btn-primary" @click="${(e) =>this.focus("footprints_section")}" >Footprints</button>
-<div class="divider"></div>
-<div id="currentShapeDiv" class="teal-text text-darken-2">
-${this.currentShape.url}
-</div>
-</div>
-${this.shapes.map(shape => html`
-  ${getShape(shape)}
-  `)}
-  <shexy-formatter
-  name="${this.currentShape}"
-  .shape="${this.currentShape}"
-  .data="${this.data}"
-  ></shexy-formatter>
+
+  ${this.shape_url != undefined && this.shape_url.length > 0 ?
+    html`Form : ${this.shape_url}`
+    :html`You can use your own shape url to build a form adding
+     "?shape_url=url_to_form" as parameter in the address bar<br>
+    example :
+    <a href="${window.location}?shape_url=https://holacratie.solid.community/public/Schema/todo.shex" target="_blank">
+    ${window.location}?shape_url=https://holacratie.solid.community/public/Schema/todo.shex
+    </a>
+    <br>
+    Find some examples here <a href="https://holacratie.solid.community/public/Schema/" target="_blank">https://holacratie.solid.community/public/Schema</a>
+    `}
+
+    <div class="section" id="forms_section">
+    <h5>Forms</h5>
+    <div  class="row">
+    ${this.shapes.map(i => html`
+      ${i.style == "regular"
+      ? html `
+      <button type="button" class="btn btn-primary" @click="${(e) =>this.panelClicked(i)}">
+      ${this.localName(i.url)}
+      </button>`
+      :html ``
+    }`
+  )}
+  </div>
+  </div>
+
+  <div class="divider" id="top_Form"></div>
+  <div >
+  <button type="button" class="btn btn-primary" @click="${(e) =>this.focus("forms_section")}">Forms</button>
+  <button type="button" class="btn btn-primary" @click="${(e) =>this.focus("footprints_section")}" >Footprints</button>
   <div class="divider"></div>
-  <div class="section" id="footprints_section">
-  <h5>Footprints</h5>
-  <p>To change the storage location of this data, use the "_Footprint" before submitting</p>
-  <div class="row center-align">
-  ${this.shapes.map(i => html`
-    ${i.style == "footprint"
-    ? html `
-    <button type="button"
-    class="btn btn-primary"
-     title=${i.url}
+  <div id="currentShapeDiv" class="teal-text text-darken-2">
+  ${this.currentShape.url}
+  </div>
+  </div>
+  ${this.shapes.map(shape => html`
+    ${getShape(shape)}
+    `)}
+    <shexy-formatter
+    name="${this.currentShape}"
+    .shape="${this.currentShape}"
+    .data="${this.data}"
+    ></shexy-formatter>
+    <div class="divider"></div>
+    <div class="section" id="footprints_section">
+    <h5>Footprints</h5>
+    <p>To change the storage location of this data, use the "_Footprint" before submitting</p>
+    <div class="row center-align">
+    ${this.shapes.map(i => html`
+      ${i.style == "footprint"
+      ? html `
+      <button type="button"
+      class="btn btn-primary"
+      title=${i.url}
       @click="${(e) =>this.panelClicked(i)}"> ${this.localName(i.url)}</button>`
-    : html ``
-  }`
-)}
-</div>
-</div>
-</div>
-`;
+      : html ``
+    }`
+  )}
+  </div>
+  </div>
+  </div>
+  `;
 }
 
 
@@ -727,6 +741,30 @@ firstUpdated(){
     }
   };
 
+  let params = this.recupParams()
+  console.log("Params",params)
+  if(params.shape_url != undefined && params.shape_url.length > 0){
+    this.shape_url = params.shape_url
+    this.load_schema(this.shape_url)
+  }
+}
+
+recupParams(){
+  //console.log(window.location)
+  var url = window.location.search+window.location.hash;  // pour catcher les /card#me
+  var params = (function(a) {
+    if (a == "") return {};
+    var b = {};
+    for (var i = 0; i < a.length; ++i)
+    {        var p=a[i].split('=', 2);
+    if (p.length == 1)
+    b[p[0]] = "";
+    else
+    b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
+  }
+  return b;
+})(url.substr(1).split('&'));
+return params;
 }
 
 webIdChanged(webId){

@@ -9,18 +9,20 @@ class AppElement extends LitElement {
   static get properties() {
     return {
       name: {type: String},
-      something: {type: String},
+      something: {type: String}
     };
   }
 
   constructor() {
     super();
     this.something = "App Element"
+
   }
 
   render(){
     return html`
     <h4>${this.something}</h4>
+
     <login-element name="Login">Loading...</login-element>
     <main-element name="Main">Loading...</main-element>
     <nav-element name="Nav" destinataire="Main">Loading...</nav-element>
@@ -45,6 +47,7 @@ class AppElement extends LitElement {
         }
       }
     };
+
   }
 
   webIdChanged(webId){

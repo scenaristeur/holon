@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit-element';
 import { HelloAgent } from './agents/hello-agent.js';
-//import './shexy-solid.js'
+import './shexy-solid.js'
 import './solid-write-element.js'
 
 class ShexyFormatter extends LitElement {
@@ -34,8 +34,9 @@ class ShexyFormatter extends LitElement {
       console.log(`${propName} changed. oldValue: ${oldValue}`);
     });
     if (changedProperties.has('data')){
-      this.processData()
-
+      if(Object.keys(this.data).length > 0){
+          this.processData()
+      }
     }
     return  changedProperties.has('data') || changedProperties.has('ttl');
   }
@@ -99,7 +100,7 @@ class ShexyFormatter extends LitElement {
 
   }
 
-  this.agent.send("SolidWrite", {action: {ttlChanged: this.ttl}})
+  this.agent.send("SolidWrite", {action: "ttlChanged", ttl: this.ttl})
 
 }
 

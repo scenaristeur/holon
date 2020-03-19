@@ -1,4 +1,6 @@
 import { LitElement, html } from 'lit-element';
+import { HelloAgent } from './agents/hello-agent.js';
+
 import * as auth from 'solid-auth-client';
 
 //import { HelloAgent } from './agents/hello-agent.js';
@@ -194,7 +196,6 @@ class SolidFolders extends LitElement {
 
   render() {
     return html`
-    <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
     <style>
     select {
       display: block; # obligé car materializecss n'arrive pas à initilaiser les selects
@@ -231,9 +232,17 @@ class SolidFolders extends LitElement {
 
     <option value="" disabled selected>${this.localName(this.url)}</option>
     <option value="" ></option>
-    ${this.folder.files.map(i => html`
-      <option value="${i.url}"  >${i.label || i.name}</option>
-      `)}
+
+${this.folder.files != undefined ?
+  html`    ${this.folder.files.map(i => html`
+        <option value="${i.url}"  >${i.label || i.name}</option>
+        `)}
+        `
+  :html``
+}
+
+
+
       </slot>
       </select>
       `;
