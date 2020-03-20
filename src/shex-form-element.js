@@ -238,7 +238,7 @@ ${constraint.values
     ${window.location}?shape_url=https://holacratie.solid.community/public/Schema/todo.shex
     </a>
     <br>
-    Find some examples here <a href="https://holacratie.solid.community/public/Schema/" target="_blank">https://holacratie.solid.community/public/Schema</a>
+    Find some examples here <a href="https://holacratie.solid.community/public/Schema/"
     `}
 
     <div class="section" id="forms_section">
@@ -269,7 +269,7 @@ ${constraint.values
     ${getShape(shape)}
     `)}
     <shexy-formatter
-    name="${this.currentShape}"
+    name="ShexyFormatter"
     .shape="${this.currentShape}"
     .data="${this.data}"
     ></shexy-formatter>
