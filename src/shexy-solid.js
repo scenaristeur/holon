@@ -196,6 +196,8 @@ class SolidFolders extends LitElement {
 
   render() {
     return html`
+    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" >
+
     <style>
     select {
       display: block; # obligé car materializecss n'arrive pas à initilaiser les selects
@@ -225,8 +227,7 @@ class SolidFolders extends LitElement {
     </style>
 
 
-    <select class="teal lighten-4"
-    title="${this.url}"
+    <select class="form-control" title="${this.url}"
     @change=${this.selectorChange}>
     <slot name="mySelect">
 
@@ -240,9 +241,6 @@ ${this.folder.files != undefined ?
         `
   :html``
 }
-
-
-
       </slot>
       </select>
       `;

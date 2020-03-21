@@ -1,5 +1,6 @@
 import { LitElement, html } from 'lit-element';
 import { HelloAgent } from './agents/hello-agent.js';
+import * as auth from 'solid-auth-client';
 import './shexy-formatter.js'
 
 class ShexFormElement extends LitElement {
@@ -30,22 +31,10 @@ class ShexFormElement extends LitElement {
     this.counter = 0;
     this.lastPredicate = "unknown";
     this.data = {}
+    this.fileClient = new SolidFileClient(auth)
   }
 
   render(){
-
-    const getMinMax = (constraint) => html `
-    <label><small>
-    ${constraint.min
-      ? html `min: ${constraint.min},`
-      : html ``
-    }
-    ${constraint.max
-      ? html ` max: ${constraint.max}`
-      : html ``
-    }
-    </small></label><br>`
-
 
     const getShape = (shape) => html `
     <div class="container">
@@ -128,36 +117,21 @@ class ShexFormElement extends LitElement {
       ${Object.keys(shapeExp).map(key =>
         html`${key == "type"
         ? html `<!--<span>${key}: ${shapeExp[key]}<br></span>-->`
-        : html `<!--<p>
-        <label class="flow-text">
-        <input class="form-control"
-        id="${this.setUuid()}"
+        : html `    <div class="form-check">
+        <label class="form-check-label" for="${this.setUuid()}">
+        ${key}
+        </label>
+        <input class="form-check-input"
+        id="${this.getUuid()}"
         title="${shapeExp}"
         name="${this.getLastPredicate()}"
         format="${key}"
         type="radio"
         checked />
-        <span class="flow-text teal lighten-5 darken-3-text">${key}</span>
-        ${getConstraint(shapeExp)}
-        </label>
-        </p>
-        -->
-        <div class="form-check">
-        <input class="form-check-input"
-        type="radio"
-        name="${this.getLastPredicate()}"
-        id="${this.setUuid()}"
-        format="${key}"
-        value="option1"
-        title="${shapeExp}"
-        checked>
-        <label class="form-check-label" for="${this.getUuid()}">
-        ${key}
-        </label>
+
+
         ${getConstraint(shapeExp)}
         </div>
-
-
 
         `
       }
@@ -203,10 +177,13 @@ ${constraint.reference
   @select-event="${(e) => { this.changeValue(e, "mySelect") }}" >
   <select id="mySelect" slot="mySelect"
   class="custom-select"
+  valueof="${this.getUuid()}"
   name="${this.getLastPredicate()}"
   @change=${this.selectorChange}>
   </select>
   </solid-folders>
+
+
   <a href="${constraint.reference}"
   title="See existing ${this.localName(constraint.reference)} at ${constraint.reference}"
   target="blank">
@@ -240,13 +217,23 @@ ${constraint.values
   }
   `
 
+  const getMinMax = (constraint) => html `
+  <label><small>
+  ${constraint.min
+    ? html `min: ${constraint.min},`
+    : html ``
+  }
+  ${constraint.max
+    ? html ` max: ${constraint.max}`
+    : html ``
+  }
+  </small></label><br>`
+
   return html`
   <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" >
   <link href="css/fontawesome/css/all.css" rel="stylesheet">
+
   <div class="container">
-
-
-
   ${this.shape_url != undefined && this.shape_url.length > 0 ?
     html`Form : ${this.shape_url}`
     :html`You can use your own shape url to build a form adding
@@ -283,14 +270,11 @@ ${constraint.values
   ${this.currentShape.url}
   </div>
   </div>
+
   ${this.shapes.map(shape => html`
     ${getShape(shape)}
     `)}
-    <shexy-formatter
-    name="ShexyFormatter"
-    .shape="${this.currentShape}"
-    .data="${this.data}"
-    ></shexy-formatter>
+
     <div class="divider"></div>
     <div class="section" id="footprints_section">
     <h5>Footprints</h5>
@@ -309,6 +293,14 @@ ${constraint.values
   </div>
   </div>
   </div>
+
+
+  <shexy-formatter
+  name="ShexyFormatter"
+  .shape="${this.currentShape}"
+  .data="${this.data}"
+  ></shexy-formatter>
+
   `;
 }
 
@@ -402,15 +394,14 @@ toText(json){
     var formData =   this.jsonFromForm(id)
     console.log("fdata",formData)
     var id_footprint = id+"_Footprint"
-    // TODO FOOTPRINTS
-    //  console.log("idfootprint",id_footprint)
-    //  var footprintData = this.jsonFromForm(id_footprint)
-    //  console.log("fpdata",footprintData)
+    console.log("idfootprint",id_footprint)
+    var footprintData = this.jsonFromForm(id_footprint)
+    console.log("fpdata",footprintData)
     this.data = {}
     var data = {}
     data[id] = {}
     data[id].form = formData
-    //  data[id].footprint = footprintData
+    data[id].footprint = footprintData
     this.data = data
     console.log(this.data)
   }
@@ -540,72 +531,11 @@ toText(json){
 
 
 
+
+
+
+
 jsonFromForm(id){
-
-  //  console.log(id)
-  if (this.shadowRoot.getElementById(id) != null){
-    var currentFormFields = this.shadowRoot.getElementById(id).elements
-    //  console.log(currentFormFields)
-    var currentFormLength = this.shadowRoot.getElementById(id).elements.length;
-    //  console.log( "Found " + currentFormFields.length + " elements in the form "+id);
-
-
-    var params = {};
-    let lastField = {}
-    for( var i=0; i<currentFormFields.length; i++ )
-    {
-      var field = currentFormFields[i]
-      if  ((field.nodeName != "FIELDSET") && (field.nodeName != "BUTTON")){
-        console.log("\n----------------")
-        field.valid = true;
-
-        // first check if radio is checked
-        switch (field.type) {
-          case "radio":
-        //  console.log(field.type, field.checked, field.nodeName, field.name, field.id,field)
-
-
-          break;
-          default:
-        //  console.log("lastfield",lastField.type, lastField.checked);
-          let selected = lastField.type != "radio"  || lastField.checked == true
-if(selected){
-          console.log(selected,field.type, field.nodeName, field.name, field.id,field)
-
-          switch (field.nodeName) {
-            case "SELECT":
-            this.traiteSelect(field)
-            break;
-            default:
-            //  console.log("NOT IMPLEMENTED",field.name, field.nodeName, field.type, "----------------",field)
-          }
-        }
-          //  console.log("NOT IMPLEMENTED",field.name, field.nodeName, field.type, "----------------",field)
-        }
-            lastField = field
-
-
-
-      }
-
-    }
-  }
-}
-
-traiteRadio(field){
-
-  this.lastRadio = field.checked
-}
-
-traiteSelect(field){
-  console.log("SELECT",field)
-}
-
-
-
-
-
-jsonFromForm1(id){
 
   console.log(id)
   if (this.shadowRoot.getElementById(id) != null){
@@ -635,6 +565,10 @@ jsonFromForm1(id){
           console.log("nextsibling",field.nextElementSibling)
           var span = field.nextElementSibling
           var elem = span.nextElementSibling
+          console.log("ELEMENT",elem)
+          if (elem.type == undefined){
+            elem = elem.firstChild
+          }
           console.log("nextsibling",elem.type, elem)
           if (elem.type == "input"){
             console.log(elem.value)

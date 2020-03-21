@@ -51,7 +51,8 @@ class ShexFormElement extends LitElement {
     <div class="container">
     <form  id ="${shape.url}" class="flow-text" ?hidden=${this.isHidden(shape.url)}>
     <legend> <h2> ${this.localName(shape.url)} </h2></legend>
-    ${getConstraint(shape.constraint)}
+    ${this.shapeDisplay(shape)}
+    <br>
     ${shape.style == "regular" ?
     html `<button type="button" class="btn btn-primary" @click="${(e) =>this.submitForm()}">
     <i class="far fa-save"></i> Save ${this.localName(shape.url)}
@@ -64,7 +65,8 @@ class ShexFormElement extends LitElement {
     </div>
     `
 
-    const getConstraint = (constraint) => html`
+
+    const getConstraint1 = (constraint) => html`
     ${constraint.type ?
       html ``
       :html`type non défini : ${this.toText(constraint)}`
@@ -128,7 +130,7 @@ class ShexFormElement extends LitElement {
       ${Object.keys(shapeExp).map(key =>
         html`${key == "type"
         ? html `<!--<span>${key}: ${shapeExp[key]}<br></span>-->`
-        : html `<!--<p>
+        : html `<p>
         <label class="flow-text">
         <input class="form-control"
         id="${this.setUuid()}"
@@ -141,24 +143,6 @@ class ShexFormElement extends LitElement {
         ${getConstraint(shapeExp)}
         </label>
         </p>
-        -->
-        <div class="form-check">
-        <input class="form-check-input"
-        type="radio"
-        name="${this.getLastPredicate()}"
-        id="${this.setUuid()}"
-        format="${key}"
-        value="option1"
-        title="${shapeExp}"
-        checked>
-        <label class="form-check-label" for="${this.getUuid()}">
-        ${key}
-        </label>
-        ${getConstraint(shapeExp)}
-        </div>
-
-
-
         `
       }
       `
@@ -311,7 +295,99 @@ ${constraint.values
   </div>
   `;
 }
+/////////////////V2
 
+shapeDisplay(shape){
+  console.log(shape.url)
+  console.log(shape.style)
+  //  console.log(shape.constraint)
+  switch (shape.style) {
+    case "regular":
+    return html `${this.shapeTemplate(shape.constraint)}`
+    break;
+    case "footprint":
+    return html `${this.footprintTemplate(shape.constraint)}`
+    break;
+    default:
+    console.log("Shape Style inconnu", shape.style)
+
+  }
+}
+
+shapeTemplate(constraint){
+  //console.log(constraint)
+  return html`${this.expressionTemplate(constraint.expression)}`
+}
+footprintTemplate(constraint){
+  //  console.log(constraint)
+  return html`${this.expressionTemplate(constraint.expression)}`
+}
+expressionTemplate(expression){
+//  console.log(expression)
+  let eTemplate = html `Loading`
+  switch (expression.type) {
+    case "EachOf":
+    eTemplate = this.EachOf(expression.expressions)
+    break;
+    case "OneOf":
+    eTemplate = this.OneOf(expression.expressions)
+    break;
+    case "TripleConstraint":
+    eTemplate = this.TripleConstraint(expression)
+    break;
+    case "NodeConstraint":
+    eTemplate = this.NodeConstraint(expression)
+    break;
+    case "ShapeOr":
+    eTemplate = this.ShapeOr(expression)
+    break;
+    case "ShapeAnd":
+    eTemplate = this.ShapeAnd(expression)
+    break;
+    default:
+    eTemplate = html`${expression.type} "INCONNUE"`
+  }
+  console.log(eTemplate)
+  return eTemplate
+}
+
+EachOf(expressions){
+  console.log("-EACH OF-")
+  return expressions.forEach((e, i) => {
+    return this.expressionTemplate(e)
+  });
+}
+
+OneOf(expressions){
+  console.log("-1 OF-")
+  return expressions.forEach((e, i) => {
+    return this.expressionTemplate(e)
+  });
+}
+
+TripleConstraint(expression){
+  console.log("-triple predicate", expression.predicate, "valueExpr", expression.valueExpr)
+return this.expressionTemplate(expression.valueExpr)
+}
+
+NodeConstraint(expression){
+  console.log("NodeConstraint",expression)
+  console.log(expression.values || expression.datatype)
+  return html `${expression.values || expression.datatype}`
+}
+
+ShapeOr(expression){
+console.log("-shapeOr",expression)
+  return this.expressionTemplate(expression.shapeExprs)
+}
+ShapeAnd(expression){
+  console.log("-shapeAnd", expression)
+  return this.expressionTemplate(expression.shapeExprs)
+}
+
+
+
+////////////////////FIN V2
 
 selectorChange(e) {
   console.log(e);
@@ -402,15 +478,14 @@ toText(json){
     var formData =   this.jsonFromForm(id)
     console.log("fdata",formData)
     var id_footprint = id+"_Footprint"
-    // TODO FOOTPRINTS
-    //  console.log("idfootprint",id_footprint)
-    //  var footprintData = this.jsonFromForm(id_footprint)
-    //  console.log("fpdata",footprintData)
+    console.log("idfootprint",id_footprint)
+    var footprintData = this.jsonFromForm(id_footprint)
+    console.log("fpdata",footprintData)
     this.data = {}
     var data = {}
     data[id] = {}
     data[id].form = formData
-    //  data[id].footprint = footprintData
+    data[id].footprint = footprintData
     this.data = data
     console.log(this.data)
   }
@@ -540,72 +615,11 @@ toText(json){
 
 
 
+
+
+
+
 jsonFromForm(id){
-
-  //  console.log(id)
-  if (this.shadowRoot.getElementById(id) != null){
-    var currentFormFields = this.shadowRoot.getElementById(id).elements
-    //  console.log(currentFormFields)
-    var currentFormLength = this.shadowRoot.getElementById(id).elements.length;
-    //  console.log( "Found " + currentFormFields.length + " elements in the form "+id);
-
-
-    var params = {};
-    let lastField = {}
-    for( var i=0; i<currentFormFields.length; i++ )
-    {
-      var field = currentFormFields[i]
-      if  ((field.nodeName != "FIELDSET") && (field.nodeName != "BUTTON")){
-        console.log("\n----------------")
-        field.valid = true;
-
-        // first check if radio is checked
-        switch (field.type) {
-          case "radio":
-        //  console.log(field.type, field.checked, field.nodeName, field.name, field.id,field)
-
-
-          break;
-          default:
-        //  console.log("lastfield",lastField.type, lastField.checked);
-          let selected = lastField.type != "radio"  || lastField.checked == true
-if(selected){
-          console.log(selected,field.type, field.nodeName, field.name, field.id,field)
-
-          switch (field.nodeName) {
-            case "SELECT":
-            this.traiteSelect(field)
-            break;
-            default:
-            //  console.log("NOT IMPLEMENTED",field.name, field.nodeName, field.type, "----------------",field)
-          }
-        }
-          //  console.log("NOT IMPLEMENTED",field.name, field.nodeName, field.type, "----------------",field)
-        }
-            lastField = field
-
-
-
-      }
-
-    }
-  }
-}
-
-traiteRadio(field){
-
-  this.lastRadio = field.checked
-}
-
-traiteSelect(field){
-  console.log("SELECT",field)
-}
-
-
-
-
-
-jsonFromForm1(id){
 
   console.log(id)
   if (this.shadowRoot.getElementById(id) != null){

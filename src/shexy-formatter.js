@@ -67,6 +67,7 @@ class ShexyFormatter extends LitElement {
       //  var ttlString = app.ttlBase
 
       for (let [predicate, object] of Object.entries(data.form)) {
+        console.log(predicate, object)
         if( object.value.length > 0){
           if ((predicate == "http://schema.org/name") &&  (object.value.length > 0)){
             var underName  = object.value.split(' ').join('_');

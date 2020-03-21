@@ -2,6 +2,8 @@ import { LitElement, html } from 'lit-element';
 import { HelloAgent } from './agents/hello-agent.js';
 import './shexy-formatter.js'
 
+import './shexy-form.js'
+
 class ShexFormElement extends LitElement {
 
   static get properties() {
@@ -45,6 +47,12 @@ class ShexFormElement extends LitElement {
       : html ``
     }
     </small></label><br>`
+
+    const shapeRenderer = (shape) => html `
+    <div class="container">
+    <shexy-form id ="${shape.url}" .shape=${shape} name="${this.localName(shape.url)}" ?hidden=${this.isHidden(shape.url)}></shexy-form>
+    </div>
+    `
 
 
     const getShape = (shape) => html `
@@ -128,7 +136,7 @@ class ShexFormElement extends LitElement {
       ${Object.keys(shapeExp).map(key =>
         html`${key == "type"
         ? html `<!--<span>${key}: ${shapeExp[key]}<br></span>-->`
-        : html `<!--<p>
+        : html `<p>
         <label class="flow-text">
         <input class="form-control"
         id="${this.setUuid()}"
@@ -141,24 +149,6 @@ class ShexFormElement extends LitElement {
         ${getConstraint(shapeExp)}
         </label>
         </p>
-        -->
-        <div class="form-check">
-        <input class="form-check-input"
-        type="radio"
-        name="${this.getLastPredicate()}"
-        id="${this.setUuid()}"
-        format="${key}"
-        value="option1"
-        title="${shapeExp}"
-        checked>
-        <label class="form-check-label" for="${this.getUuid()}">
-        ${key}
-        </label>
-        ${getConstraint(shapeExp)}
-        </div>
-
-
-
         `
       }
       `
@@ -284,6 +274,7 @@ ${constraint.values
   </div>
   </div>
   ${this.shapes.map(shape => html`
+    ${shapeRenderer(shape)}
     ${getShape(shape)}
     `)}
     <shexy-formatter
@@ -402,15 +393,14 @@ toText(json){
     var formData =   this.jsonFromForm(id)
     console.log("fdata",formData)
     var id_footprint = id+"_Footprint"
-    // TODO FOOTPRINTS
-    //  console.log("idfootprint",id_footprint)
-    //  var footprintData = this.jsonFromForm(id_footprint)
-    //  console.log("fpdata",footprintData)
+    console.log("idfootprint",id_footprint)
+    var footprintData = this.jsonFromForm(id_footprint)
+    console.log("fpdata",footprintData)
     this.data = {}
     var data = {}
     data[id] = {}
     data[id].form = formData
-    //  data[id].footprint = footprintData
+    data[id].footprint = footprintData
     this.data = data
     console.log(this.data)
   }
@@ -540,72 +530,11 @@ toText(json){
 
 
 
+
+
+
+
 jsonFromForm(id){
-
-  //  console.log(id)
-  if (this.shadowRoot.getElementById(id) != null){
-    var currentFormFields = this.shadowRoot.getElementById(id).elements
-    //  console.log(currentFormFields)
-    var currentFormLength = this.shadowRoot.getElementById(id).elements.length;
-    //  console.log( "Found " + currentFormFields.length + " elements in the form "+id);
-
-
-    var params = {};
-    let lastField = {}
-    for( var i=0; i<currentFormFields.length; i++ )
-    {
-      var field = currentFormFields[i]
-      if  ((field.nodeName != "FIELDSET") && (field.nodeName != "BUTTON")){
-        console.log("\n----------------")
-        field.valid = true;
-
-        // first check if radio is checked
-        switch (field.type) {
-          case "radio":
-        //  console.log(field.type, field.checked, field.nodeName, field.name, field.id,field)
-
-
-          break;
-          default:
-        //  console.log("lastfield",lastField.type, lastField.checked);
-          let selected = lastField.type != "radio"  || lastField.checked == true
-if(selected){
-          console.log(selected,field.type, field.nodeName, field.name, field.id,field)
-
-          switch (field.nodeName) {
-            case "SELECT":
-            this.traiteSelect(field)
-            break;
-            default:
-            //  console.log("NOT IMPLEMENTED",field.name, field.nodeName, field.type, "----------------",field)
-          }
-        }
-          //  console.log("NOT IMPLEMENTED",field.name, field.nodeName, field.type, "----------------",field)
-        }
-            lastField = field
-
-
-
-      }
-
-    }
-  }
-}
-
-traiteRadio(field){
-
-  this.lastRadio = field.checked
-}
-
-traiteSelect(field){
-  console.log("SELECT",field)
-}
-
-
-
-
-
-jsonFromForm1(id){
 
   console.log(id)
   if (this.shadowRoot.getElementById(id) != null){
