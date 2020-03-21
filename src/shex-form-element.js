@@ -562,32 +562,31 @@ jsonFromForm(id){
         // first check if radio is checked
         switch (field.type) {
           case "radio":
-        //  console.log(field.type, field.checked, field.nodeName, field.name, field.id,field)
+          //  console.log(field.type, field.checked, field.nodeName, field.name, field.id,field)
 
 
           break;
           default:
-        //  console.log("lastfield",lastField.type, lastField.checked);
+          //  console.log("lastfield",lastField.type, lastField.checked);
           let selected = lastField.type != "radio"  || lastField.checked == true
-if(selected){
-          console.log(selected,field.type, field.nodeName, field.name, field.id,field)
+          if(selected){
+            console.log(selected,field.type, field.nodeName, field.name, field.id, field.value, field.slotvalue, field)
+            let value = field.value
+            switch (field.nodeName) {
+              case "SELECT":
+              field.value === "" ? value = field.slotvalue : ""
+              break;
+              default:
+              //  console.log("NOT IMPLEMENTED",field.name, field.nodeName, field.type, "----------------",field)
+            }
+            console.log(field.name, value)
 
-          switch (field.nodeName) {
-            case "SELECT":
-            this.traiteSelect(field)
-            break;
-            default:
-            //  console.log("NOT IMPLEMENTED",field.name, field.nodeName, field.type, "----------------",field)
+
           }
-        }
           //  console.log("NOT IMPLEMENTED",field.name, field.nodeName, field.type, "----------------",field)
         }
-            lastField = field
-
-
-
+        lastField = field
       }
-
     }
   }
 }
