@@ -2,7 +2,8 @@ import { LitElement, html } from 'lit-element';
 import { HelloAgent } from './agents/hello-agent.js';
 import './shexy-formatter.js'
 
-import  data  from "@solid/query-ldflex";
+import * as auth from 'solid-auth-client';
+
 
 
 class ShexFormElement extends LitElement {
@@ -33,6 +34,8 @@ class ShexFormElement extends LitElement {
     this.counter = 0;
     this.lastPredicate = "unknown";
     this.data = {}
+    this.fileClient = new SolidFileClient(auth)
+
   }
 
   render(){
@@ -191,6 +194,7 @@ ${constraint.nodeKind
 }
 ${constraint.reference
   ? html`
+  <!--
   <input type="text" class="validate teal lighten-5"
   placeholder="${constraint.reference}"
   title="${constraint.reference}"
@@ -200,14 +204,19 @@ ${constraint.reference
   valueof="${this.getUuid()}"
   @click="${this.changeRadio}"
   ></input>
+  -->
+  <select
+  class="custom-select"
+  url="${constraint.reference}"
+  name="${this.getLastPredicate()}"
+  valueof="${this.getUuid()}"
+  @click="${this.changeRadio}"
+  placeholder="${constraint.reference}"
+  title="${constraint.reference}"
+  label="${constraint.reference}"
+  >
 
-<select
-class="custom-select"
-url="${constraint.reference}"
-name="${this.getLastPredicate()}"
->
-
-</select>
+  </select>
 
   <br>
   <!--  <solid-folders
@@ -328,8 +337,24 @@ ${constraint.values
   `;
 }
 
-
 async getFilesFrom(url){
+  console.log("@@@@@@@@@@@",url)
+  let f
+  return this.fileClient.readFolder(url).then(folder => {
+    console.log(folder)
+    return  folder
+
+    //  return  html`NAME : ${folder.name}`
+  },
+  err =>
+  {
+    console.log(err)
+    //alert("error")
+  })
+
+}
+
+async getFilesFrom1(url){
   console.log("@@@@@@@@@@@",url)
   let files = []
   for await (const file of data[url].subjects){
@@ -337,28 +362,8 @@ async getFilesFrom(url){
     files = [...files, `${file}`]
   }
   console.log(files)
-  return html`${files.length}`
+  return files
 }
-
-async getFilesFrom1(url){
-  console.log("@@@@@@@@@@@",url)
-
-  let folder = await this.fileClient.readFolder(url).then(folder => {
-    console.log(folder)
-    return folder
-    //  return "GET"+folder.files.length+url
-    //  return  html`NAME : ${folder.name}`
-  },
-  err =>
-  {
-    console.log(err)
-    //alert("error")
-  });
-  console.log(folder)
-  return folder.files.length
-}
-
-
 
 selectorChange(e) {
   console.log(e);
@@ -859,21 +864,31 @@ parseSchema(schema){
 }
 
 updated(props){
-  console.log(props)
+  //  console.log(props)
   let selects = this.shadowRoot.querySelectorAll("select")
-  console.log("_______________________________________\nSELECTS",selects)
+  //  console.log("_______________________________________\nSELECTS",selects)
   if (selects.length > 0){
     this.updateSelects(selects)
   }
 }
 
-updateSelects(selects){
+async updateSelects(selects){
   for (var select of selects) {
-    console.log(select, select.getAttribute("url"),  select.options.length, select.options)
-let url = select.getAttribute("url")
-if (select.options.length == 0 && url != null){
-  console.log("GET",  url)
-}
+    //  console.log(select, select.getAttribute("url"),  select.options.length, select.options)
+    let url = select.getAttribute("url")
+    if (select.options.length == 0 && url != null){
+      //  console.log("GET",  url)
+      let folder  = await this.getFilesFrom(url)
+      console.log("##FILES", folder)
+      folder.files.forEach((f, i) => {
+        var option = document.createElement("option");
+        option.text = f.label || f.name;
+        option.value = f.url
+        //  console.log(option)
+        //<option value="${i.url}"  >${i.label || i.name}</option>
+        select.add(option);
+      });
+    }
     //<!--  ${this.getFilesFrom(constraint.reference)}-->
   }
 }

@@ -299,11 +299,7 @@ class SolidFolders extends LitElement {
           }, err => console.log(err) );
         }
         //alert("error")
-      }
-
-
-
-    );
+      });
   }
 
 
