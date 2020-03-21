@@ -181,7 +181,8 @@ class SolidFolders extends LitElement {
   static get properties() {
     return {
       url: { type: String },
-      folder: {type: Object}
+      folder: {type: Object},
+      id:{type: String}
 
     };
   }
@@ -192,6 +193,7 @@ class SolidFolders extends LitElement {
     this.fileClient = new SolidFileClient(auth)
     this.folder = {}
     this.folder.name = "test folder name"
+    this.id = "test id select"
   }
 
   render() {
@@ -227,20 +229,22 @@ class SolidFolders extends LitElement {
     </style>
 
 
-    <select class="form-control" title="${this.url}"
-    @change=${this.selectorChange}>
+    <select class="form-control"
+    title="${this.url}"
+    @change="${this.selectorChange}"
+    id="${this.id}">
     <slot name="mySelect">
 
     <option value="" disabled selected>${this.localName(this.url)}</option>
     <option value="" ></option>
 
-${this.folder.files != undefined ?
-  html`    ${this.folder.files.map(i => html`
+    ${this.folder.files != undefined ?
+      html`    ${this.folder.files.map(i => html`
         <option value="${i.url}"  >${i.label || i.name}</option>
         `)}
         `
-  :html``
-}
+        :html``
+      }
       </slot>
       </select>
       `;
@@ -333,7 +337,7 @@ class SolidLogin extends LitElement {
 
   constructor() {
     super();
-      this.fileClient = new SolidFileClient(auth)
+    this.fileClient = new SolidFileClient(auth)
     this.logged = false;
     this.webId = ""
   }

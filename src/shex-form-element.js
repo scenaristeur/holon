@@ -2,6 +2,9 @@ import { LitElement, html } from 'lit-element';
 import { HelloAgent } from './agents/hello-agent.js';
 import './shexy-formatter.js'
 
+import  data  from "@solid/query-ldflex";
+
+
 class ShexFormElement extends LitElement {
 
   static get properties() {
@@ -188,25 +191,38 @@ ${constraint.nodeKind
 }
 ${constraint.reference
   ? html`
-  <!--1  <input type="text" class="validate teal lighten-5"
+  <input type="text" class="validate teal lighten-5"
   placeholder="${constraint.reference}"
   title="${constraint.reference}"
   label="${constraint.reference}"
+  value="${constraint.reference}"
   name="${this.getLastPredicate()}"
   valueof="${this.getUuid()}"
   @click="${this.changeRadio}"
   ></input>
-  2-->
-  <solid-folders
+
+<select
+class="custom-select"
+url="${constraint.reference}"
+name="${this.getLastPredicate()}"
+>
+
+</select>
+
+  <br>
+  <!--  <solid-folders
   url="${constraint.reference}"
-  @change=${this.selectorChange}
-  @select-event="${(e) => { this.changeValue(e, "mySelect") }}" >
-  <select id="mySelect" slot="mySelect"
+  @change="${this.selectorChange}"
+  id="${this.setUuid()}"
+  @select-event="${(e) => { this.changeValue(e, this.getUuid()) }}"
+  >
+  <select slot="mySelect"
   class="custom-select"
+  id="${this.getUuid()}"
   name="${this.getLastPredicate()}"
   @change=${this.selectorChange}>
   </select>
-  </solid-folders>
+  </solid-folders>-->
   <a href="${constraint.reference}"
   title="See existing ${this.localName(constraint.reference)} at ${constraint.reference}"
   target="blank">
@@ -311,6 +327,37 @@ ${constraint.values
   </div>
   `;
 }
+
+
+async getFilesFrom(url){
+  console.log("@@@@@@@@@@@",url)
+  let files = []
+  for await (const file of data[url].subjects){
+    console.log("file", `${file}` );
+    files = [...files, `${file}`]
+  }
+  console.log(files)
+  return html`${files.length}`
+}
+
+async getFilesFrom1(url){
+  console.log("@@@@@@@@@@@",url)
+
+  let folder = await this.fileClient.readFolder(url).then(folder => {
+    console.log(folder)
+    return folder
+    //  return "GET"+folder.files.length+url
+    //  return  html`NAME : ${folder.name}`
+  },
+  err =>
+  {
+    console.log(err)
+    //alert("error")
+  });
+  console.log(folder)
+  return folder.files.length
+}
+
 
 
 selectorChange(e) {
@@ -580,14 +627,23 @@ jsonFromForm(id){
               //  console.log("NOT IMPLEMENTED",field.name, field.nodeName, field.type, "----------------",field)
             }
             console.log(field.name, value)
-
+            var fieldData = {}
+            //  var fieldName = field.name || "unknown";
+            fieldData.value =  value;
+            fieldData.type = field.type || "unknown";
+            fieldData.format = field.placeholder || "unknown";
+            console.log(fieldData)
+            params[field.name] = fieldData;
 
           }
           //  console.log("NOT IMPLEMENTED",field.name, field.nodeName, field.type, "----------------",field)
         }
         lastField = field
+
       }
     }
+    console.log(params)
+    return params
   }
 }
 
@@ -735,7 +791,11 @@ changeValue(e, destination){
   console.log(e)
   console.log(e.target)
   console.log(e.detail.value)
+  console.log(destination)
   this.shadowRoot.getElementById(destination).slotvalue = e.detail.value
+  //  this.shadowRoot.getElementById(destination).value = e.detail.value
+  console.log(this.shadowRoot.getElementById(destination))
+
 }
 
 setUuid(){
@@ -795,8 +855,28 @@ parseSchema(schema){
   }
   console.log("SHSHSHSHS",app.shapes)
   this.requestUpdate()
+
 }
 
+updated(props){
+  console.log(props)
+  let selects = this.shadowRoot.querySelectorAll("select")
+  console.log("_______________________________________\nSELECTS",selects)
+  if (selects.length > 0){
+    this.updateSelects(selects)
+  }
+}
+
+updateSelects(selects){
+  for (var select of selects) {
+    console.log(select, select.getAttribute("url"),  select.options.length, select.options)
+let url = select.getAttribute("url")
+if (select.options.length == 0 && url != null){
+  console.log("GET",  url)
+}
+    //<!--  ${this.getFilesFrom(constraint.reference)}-->
+  }
+}
 
 
 firstUpdated(){
@@ -826,6 +906,7 @@ firstUpdated(){
     this.shape_url = params.shape_url
     this.load_schema(this.shape_url)
   }
+
 }
 
 recupParams(){
