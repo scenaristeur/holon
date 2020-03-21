@@ -16,14 +16,10 @@ class MainElement extends LitElement {
     super();
     this.something = "Main Element"
     this.panel = ""
-
   }
 
   render(){
     return html`
-    <h4>${this.something}</h4>
-    ${this.panel}<br>
-
     <shex-form-element name="ShexForm">Loading...</shex-form-element>
     <br>
     <br>

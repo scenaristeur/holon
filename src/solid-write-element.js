@@ -9,7 +9,8 @@ class SolidWriteElement extends LitElement {
     return {
       name: {type: String},
       something: {type: String},
-      ttl: {type: Object}
+      ttl: {type: Object},
+      fileUrl : {type: String}
     };
   }
 
@@ -18,13 +19,13 @@ class SolidWriteElement extends LitElement {
     this.something = "Solid Write Element"
     this.ttl = {}
     this.fileClient  = new SolidFileClient(auth)
-
+    this.fileUrl = ""
   }
 
   render(){
     return html`
     <h4>${this.something}</h4>
-    ${this.ttl.filename} :
+    <a href="${this.fileUrl}" target="_blank">${this.fileUrl}</a> :
     <pre>${this.ttl.content}</pre>
     <p>
     ${Object.keys(this.ttl).map(item =>
@@ -76,6 +77,7 @@ class SolidWriteElement extends LitElement {
     }
 
     makeFile(){
+      let app = this
       console.log("TODO get footprint")
       /*var footprint = this.ttl.footprint
 
@@ -96,6 +98,7 @@ class SolidWriteElement extends LitElement {
         console.log(fileCreated)
         console.log(`Created file ${fileCreated}.`);
         alert(fileCreated.url +" "+fileCreated.statusText)
+        app.fileUrl = fileCreated.url
         //  log (fileCreated, "Created file")
       },
       err => {

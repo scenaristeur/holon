@@ -69,12 +69,13 @@ class ShexyFormatter extends LitElement {
       for (let [predicate, object] of Object.entries(data.form)) {
         console.log(predicate, object)
         if( object.value.length > 0){
-          if ((predicate == "http://schema.org/name") &&  (object.value.length > 0)){
+          if ((predicate == "https://schema.org/name") &&  (object.value.length > 0)){
             var underName  = object.value.split(' ').join('_');
             filename = underName;
           }
           console.log(predicate, object);
-          ttlString += '<>  <'+predicate+'>  "'+object.value+'".  # Format :'+object.type+ " "+object.format+ "\n";
+let objectValue = object.value.startsWith("http") ? '<'+object.value+'>': '"'+object.value+'"';
+          ttlString += '<>  <'+predicate+'>  '+objectValue+'.  # Format :'+object.type+ " "+object.format+ "\n";
         }
       }
 

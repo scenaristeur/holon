@@ -1,41 +1,38 @@
 import { LitElement, html } from 'lit-element';
 import { HelloAgent } from './agents/hello-agent.js';
 import './shexy-formatter.js'
-
 import * as auth from 'solid-auth-client';
-
-
 
 class ShexFormElement extends LitElement {
 
   static get properties() {
     return {
       name: {type: String},
-      something: {type: String},
       shape_url: {type: String},
       shapes: {type:Array},
       footprint_shapes: { type: Array},
       currentShape: {type: Object},
       counter: {type: Number},
       lastPredicate: {type: String},
-      data :{type : Object}
+      data :{type : Object},
+      webId: {type: String},
+      today: {type: String}
     };
   }
 
   constructor() {
     super();
-    this.something = "ShexFormElement"
     this.shape_url = ""
-    this.shex = ShEx;
     this.shapes = []
-    console.log(this.shex)
     this.currentShape = {};
     this.footprint_shapes = [];
     this.counter = 0;
     this.lastPredicate = "unknown";
     this.data = {}
+    this.shex = ShEx;
     this.fileClient = new SolidFileClient(auth)
-
+    let d = new Date();
+    this.today = d.toISOString().substr(0, 10);
   }
 
   render(){
@@ -52,20 +49,32 @@ class ShexFormElement extends LitElement {
     }
     </small></label><br>`
 
-
     const getShape = (shape) => html `
     <div class="container">
-    <form  id ="${shape.url}" class="flow-text" ?hidden=${this.isHidden(shape.url)}>
+
+    <form  id ="${shape.url}" ?hidden=${this.isHidden(shape.url)}>
+      WebId : ${this.webId}
     <legend> <h2> ${this.localName(shape.url)} </h2></legend>
+
     ${getConstraint(shape.constraint)}
+
     ${shape.style == "regular" ?
-    html `<button type="button" class="btn btn-primary" @click="${(e) =>this.submitForm()}">
-    <i class="far fa-save"></i> Save ${this.localName(shape.url)}
+    html `<button
+    type="button"
+    class="btn btn-primary btn-sm"
+    @click="${(e) =>this.submitForm()}">
+    <i class="far fa-save"></i>
+    Save ${this.localName(shape.url)}
     </button>`
     : html `<br>
-    <button type="button" class="btn btn-primary" @click="${(e) =>this.displayForm(shape.url.replace('_Footprint', ''))}">
-    <i class="fas fa-backward"></i> Back to ${this.localName(shape.url.replace('_Footprint', ''))} Form
-    </button>`}
+    <button
+    type="button"
+    class="btn btn-primary btn-sm"
+    @click="${(e) =>this.displayForm(shape.url.replace('_Footprint', ''))}">
+    <i class="fas fa-backward"></i>
+    Back to ${this.localName(shape.url.replace('_Footprint', ''))} Form
+    </button>
+    `}
     </form>
     </div>
     `
@@ -75,111 +84,94 @@ class ShexFormElement extends LitElement {
       html ``
       :html`type non défini : ${this.toText(constraint)}`
     }
-    ${this.isFieldset(constraint.type)
-      ? html `<fieldset>
+    ${this.isFieldset(constraint.type) ?
+      html `<fieldset>
       <legend><span title="${this.toText(constraint)}">${constraint.type}</span></legend>
       `
       :html ``
     }
-    ${constraint.expression
-      ? html`
-      <!--  <small><span title="Expression ${this.toText(constraint.expression)}">Expression</span></small> -->
-      ${getConstraint(constraint.expression)}
-      `
+    ${constraint.expression ?
+      html`${getConstraint(constraint.expression)}`
       : html``
     }
-    ${constraint.expressions
-      ? html` <!--<small><span title="Expressions ${this.toText(constraint.expressions)}">Expressions</span></small>-->
-      ${constraint.expressions.map(i => html`${getConstraint(i)}`)}`
+    ${constraint.expressions ?
+      html`${constraint.expressions.map(i => html`${getConstraint(i)}`)}`
       : html``
     }
-    ${constraint.predicate
-      ? html`
-      <label  title="${this.toText(constraint)}">
-      ${this.setLastPredicate(constraint.predicate)}</label>`
+    ${constraint.predicate ?
+      html`<label  title="${this.toText(constraint)}">${this.setLastPredicate(constraint.predicate)}</label>`
       : html``
     }
-    ${constraint.valueExpr
-      ? html`${getConstraint(constraint.valueExpr)}`
+    ${constraint.valueExpr ?
+      html`${getConstraint(constraint.valueExpr)}`
       : html``
     }
-    ${constraint.datatype
-      ? html`${constraint.datatype.endsWith("date")
-      ? html `<!--<small>${constraint.datatype}</small><br>-->
-      <input type="date" class="form-control"
+    ${constraint.datatype ?
+      html ` <input type="${constraint.datatype.endsWith('date') ? 'date' : 'text'}"
+      class="form-control"
       title="${constraint.datatype}"
       name="${this.getLastPredicate()}"
       valueof="${this.getUuid()}"
       @click="${this.changeRadio}"
-      ></input>`
-      : html `
-      <!--<small>${constraint.datatype}</small><br>-->
-      <input type="text" class="form-control"
-      title="${constraint.datatype}"
-      label="${constraint.datatype}"
-      name="${this.getLastPredicate()}"
-      valueof="${this.getUuid()}"
-      @click="${this.changeRadio}"
-      ></input>
-      `
-    }`
-    : html``
-  }
-  ${constraint.shapeExprs
-    ? html`<div title="${this.toText(constraint)}">
-    ${constraint.type == "ShapeOr"
-    ?html `<fieldset class="teal lighten-4"><legend class="teal lighten-4"><h6> Choose one of</h6></legend>
-    ${constraint.shapeExprs.map(
-      shapeExp => html`
-      ${Object.keys(shapeExp).map(key =>
-        html`${key == "type"
-        ? html `<!--<span>${key}: ${shapeExp[key]}<br></span>-->`
-        : html `<!--<p>
-        <label class="flow-text">
-        <input class="form-control"
-        id="${this.setUuid()}"
-        title="${shapeExp}"
-        name="${this.getLastPredicate()}"
-        format="${key}"
-        type="radio"
-        checked />
-        <span class="flow-text teal lighten-5 darken-3-text">${key}</span>
-        ${getConstraint(shapeExp)}
-        </label>
-        </p>
-        -->
-        <div class="form-check">
-        <input class="form-check-input"
-        type="radio"
-        name="${this.getLastPredicate()}"
-        id="${this.setUuid()}"
-        format="${key}"
-        value="option1"
-        title="${shapeExp}"
-        checked>
-        <label class="form-check-label" for="${this.getUuid()}">
-        ${key}
-        </label>
-        ${getConstraint(shapeExp)}
-        </div>
+      value= "${constraint.datatype.endsWith('date') ? this.today : ''}">
+      </input>`
+      : html``
+    }
+    ${constraint.shapeExprs
+      ? html`<div title="${this.toText(constraint)}">
+      ${constraint.type == "ShapeOr"
+      ?html `<fieldset class="teal lighten-4"><legend class="teal lighten-4"><h6> Choose one of</h6></legend>
+      ${constraint.shapeExprs.map(
+        shapeExp => html`
+        ${Object.keys(shapeExp).map(key =>
+          html`${key == "type"
+          ? html `<!--<span>${key}: ${shapeExp[key]}<br></span>-->`
+          : html `<!--<p>
+          <label class="flow-text">
+          <input class="form-control"
+          id="${this.setUuid()}"
+          title="${shapeExp}"
+          name="${this.getLastPredicate()}"
+          format="${key}"
+          type="radio"
+          checked />
+          <span class="flow-text teal lighten-5 darken-3-text">${key}</span>
+          ${getConstraint(shapeExp)}
+          </label>
+          </p>
+          -->
+          <div class="form-check">
+          <input class="form-check-input"
+          type="radio"
+          name="${this.getLastPredicate()}"
+          id="${this.setUuid()}"
+          format="${key}"
+          value="option1"
+          title="${shapeExp}"
+          checked>
+          <label class="form-check-label" for="${this.getUuid()}">
+          ${key}
+          </label>
+          ${getConstraint(shapeExp)}
+          </div>
 
 
 
+          `
+        }
         `
-      }
+      )}
       `
     )}
+    </fieldset>
     `
-  )}
-  </fieldset>
-  `
-  : html `${constraint.shapeExprs.map(
-    shapeExp => html`${getConstraint(shapeExp)}`
-  )}
-  `
-}
-</div>`
-: html``
+    : html `${constraint.shapeExprs.map(
+      shapeExp => html`${getConstraint(shapeExp)}`
+    )}
+    `
+  }
+  </div>`
+  : html``
 }
 ${constraint.nodeKind
   ? html`<input
@@ -189,6 +181,7 @@ ${constraint.nodeKind
   name="${this.getLastPredicate()}"
   valueof="${this.getUuid()}"
   @click="${this.changeRadio}"
+  value = "${this.getLastPredicate() == 'http://www.w3.org/ns/solid/terms#webid' ? this.webId : ''}"
   ></input>${getMinMax(constraint)}`
   : html``
 }
@@ -253,7 +246,7 @@ ${constraint.values
   name="${this.getLastPredicate()}"
   placeholder = "value">
   ${constraint.values.map(i => html`
-    <option value="${i.value}"  >${i.value || i}</option>
+    <option value="${i.value||i}"  >${i.value || i}</option>
     `)}
     </select>${getMinMax(constraint)}
     `
@@ -623,12 +616,12 @@ jsonFromForm(id){
           let selected = lastField.type != "radio"  || lastField.checked == true
           if(selected){
             console.log(selected,field.type, field.nodeName, field.name, field.id, field.value, field.slotvalue, field)
-            let value = field.value
+            let value = field.value.trim()
             switch (field.nodeName) {
               case "SELECT":
               field.value === "" ? value = field.slotvalue : ""
               break;
-              default:
+      default:
               //  console.log("NOT IMPLEMENTED",field.name, field.nodeName, field.type, "----------------",field)
             }
             console.log(field.name, value)
@@ -650,146 +643,6 @@ jsonFromForm(id){
     console.log(params)
     return params
   }
-}
-
-traiteRadio(field){
-
-  this.lastRadio = field.checked
-}
-
-traiteSelect(field){
-  console.log("SELECT",field)
-}
-
-
-
-
-
-jsonFromForm1(id){
-
-  console.log(id)
-  if (this.shadowRoot.getElementById(id) != null){
-    var currentFormFields = this.shadowRoot.getElementById(id).elements
-    console.log(currentFormFields)
-    var currentFormLength = this.shadowRoot.getElementById(id).elements.length;
-    console.log( "Found " + currentFormFields.length + " elements in the form "+id);
-
-
-    var params = {};
-    for( var i=0; i<currentFormFields.length; i++ )
-    {
-      var field = currentFormFields[i]
-      //  console.log(field.name,"----------------",field)
-      var valid = true;
-      //  console.log("field type",field.type)
-      if (field.type == "radio"){
-        console.log("############################RADIO")
-        console.log(field.checked)
-        if (field.checked == false){
-          //  console.log("pas coché")
-          valid = false
-        }
-        else{
-          console.log("coché",field)
-          console.log("Format",field.getAttribute("format"))
-          console.log("nextsibling",field.nextElementSibling)
-          var span = field.nextElementSibling
-          var elem = span.nextElementSibling
-          console.log("nextsibling",elem.type, elem)
-          if (elem.type == "input"){
-            console.log(elem.value)
-          }
-          field = elem
-
-          console.log("nextsibling",elem.nextElementSibling)
-        }
-        console.log("FIN ############################RADIO")
-      }
-
-      if (
-        (field.nodeName == "FIELDSET")  ||
-        (field.nodeName == "BUTTON") ||
-        ((field.type == "radio") && (field.checked == false))
-      )
-      {
-        valid = false
-      }
-
-
-      if (field.nodeName == "SELECT")
-      {
-        //  RECUPERATION DE LA VALEUR DU SLOT
-        console.log(field)
-        console.log(field.options)
-        if (field.options.length> 0){
-          console.log(field.options[ field.selectedIndex ])
-          console.log(field.options[ field.selectedIndex ].text)
-
-          var fieldData = {}
-          var fieldName = field.name || "unknown";
-          fieldData.value =  field.options[ field.selectedIndex ].text || "unknown";
-          fieldData.type = field.type || "unknown";
-          fieldData.format = field.placeholder || "unknown";
-          console.log(fieldData)
-          params[fieldName] = fieldData;
-        }else{
-          console.log("pas d'option")
-          console.log("SLOT VALUE",field.slotvalue)
-          var fieldData = {}
-          var fieldName = field.name || "unknown";
-          fieldData.value = field.slotvalue || "unknown";
-          //  fieldData.type = field.type || "unknown";
-          //    fieldData.format = field.placeholder || "unknown";
-          console.log(fieldData)
-          params[fieldName] = fieldData;
-          console.log("##############PARAMS:",params)
-        }
-        //  field.selectedOptions[0].value || field.selectedOptions[0].text ;
-      }
-
-
-
-
-
-      //  console.log(valid)
-
-      if (valid == true ){      //  console.log(field, field.nodeName)
-        console.log("88888888888888888 ON TRAITE", field)
-        if (field.valueof != undefined){
-          console.log("VALUE OF",field.valueof)
-          var lab_span = field.previousSibling;
-          var selec = lab_span.previousSibling;
-          console.log("TEST IF CHECKED",selec)
-        }else
-
-        {
-          var fieldData = {}
-          var fieldName = field.name;
-          fieldData.value = field.value
-          fieldData.type = field.type;
-          fieldData.format = field.placeholder || "unknown";
-          console.log(fieldData)
-          params[fieldName] = fieldData;}
-        }
-
-        /*  var x = document.getElementsByName("solid-folders");
-        console.log(x)
-        */
-
-      }
-      //  console.log("params ",params)
-      /*if (!(id in data)){
-      data[id] = [];
-    }
-    data[id].push(params)
-    console.log("DATA -------- ",data)*/
-    return params
-  }else{
-    console.log("pas de footprint")
-  }
-
-  //  this.shadowRoot.getElementById("jsonBtn").disabled = false;
-
 }
 
 changeValue(e, destination){
@@ -864,32 +717,26 @@ parseSchema(schema){
 }
 
 updated(props){
-  //  console.log(props)
   let selects = this.shadowRoot.querySelectorAll("select")
-  //  console.log("_______________________________________\nSELECTS",selects)
   if (selects.length > 0){
     this.updateSelects(selects)
   }
+  // tot select first of each radio group by default let radios =
 }
 
 async updateSelects(selects){
   for (var select of selects) {
-    //  console.log(select, select.getAttribute("url"),  select.options.length, select.options)
     let url = select.getAttribute("url")
     if (select.options.length == 0 && url != null){
-      //  console.log("GET",  url)
       let folder  = await this.getFilesFrom(url)
       console.log("##FILES", folder)
       folder.files.forEach((f, i) => {
         var option = document.createElement("option");
         option.text = f.label || f.name;
         option.value = f.url
-        //  console.log(option)
-        //<option value="${i.url}"  >${i.label || i.name}</option>
         select.add(option);
       });
     }
-    //<!--  ${this.getFilesFrom(constraint.reference)}-->
   }
 }
 
@@ -944,11 +791,6 @@ return params;
 
 webIdChanged(webId){
   this.webId = webId
-  if (webId != null){
-    this.updateProfile();
-  }else{
-
-  }
 }
 
 }
