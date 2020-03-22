@@ -89,6 +89,7 @@ class NavElement extends LitElement {
 
   menuChanged(e){
     var app = this
+    console.log(e.target)
     console.log(e.target.name)
     this.menu=e.target.name
     let menus = this.shadowRoot.querySelectorAll(".navbar a")

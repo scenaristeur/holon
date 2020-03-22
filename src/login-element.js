@@ -38,11 +38,11 @@ class LoginElement extends LitElement {
     auth.trackSession(async function(session) {
       if (!session){
         app.webId=null
-        app.agent.sendMulti(['ShexySolid', 'ShexForm', 'SolidWrite'],  {action:"webIdChanged", webId: app.webId});
+        app.agent.sendMulti(['ShexyFormatter', 'ShexForm', 'SolidWrite'],  {action:"webIdChanged", webId: app.webId});
       }
       else{
         app.webId = session.webId
-        app.agent.sendMulti(['ShexySolid', 'ShexForm', 'SolidWrite'], {action:"webIdChanged", webId: app.webId});
+        app.agent.sendMulti(['ShexyFormatter', 'ShexForm', 'SolidWrite'], {action:"webIdChanged", webId: app.webId});
       }
     })
 

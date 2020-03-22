@@ -70,7 +70,7 @@ class ShexyFormatter extends LitElement {
 
       for (let [predicate, object] of Object.entries(data.form)) {
         console.log(predicate, object)
-        if( object.value.length > 0){
+        if( object.value != undefined && object.value.length > 0){
           if ((predicate == "https://schema.org/name") &&  (object.value.length > 0)){
             var underName  = object.value.split(' ').join('_');
             filename = underName;
@@ -86,15 +86,17 @@ class ShexyFormatter extends LitElement {
 
       const d = new Date();
       var now = d.toUTCString()+"\n";
-      ttlString  += "\n\n# shexy made with "+id+"\n";
-      ttlString  += "# from "+location.protocol + '//' + location.host + location.pathname+"\n";
-      ttlString += "# at "+now
+      ttlString += "\n\n# shexy made with "+id+"\n";
+      ttlString += "# from "+location.protocol + '//' + location.host + location.pathname+"\n";
+      ttlString += "# at "+now+"\n";
+      ttlString += "# by "+this.webId+"\n";
+      ttlString += "# source https://github.com/scenaristeur/holon\n";
 
       /*if (app.anonyme == false){
       ttlString  += "# by "+this.shadowRoot.getElementById("solid-session").textContent+"\n";
     }*/
     console.log(ttlString)
-    filename = filename+'.ttl'
+    filename = filename+'/index.ttl#this'
 
     /* commenter POUR DEBUG */
     ttlFile = { filename: filename , content: ttlString, footprint: data.footprint, shape: this.shape}
@@ -132,11 +134,6 @@ firstUpdated(){
 
 webIdChanged(webId){
   this.webId = webId
-  if (webId != null){
-    this.updateProfile();
-  }else{
-
-  }
 }
 
 
