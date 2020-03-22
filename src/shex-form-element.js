@@ -255,9 +255,12 @@ class ShexFormElement extends LitElement {
 
 
     ${this.shape_url != undefined && this.shape_url.length > 0 ?
-      html`Form : <a href="${this.shape_url}" target="_blank">${this.shape_url}</a><br>
-      Shape url : <a href="${this.currentShape.url}" target="_blank">${this.currentShape.url}</a><br>
-      WebId : ${this.webId}
+      html`<a href="${this.shape_url}" target="_blank">Shape url</a> |
+      <a href="${this.currentShape.url}" target="_blank">Footprint</a> |
+      ${this.webId != null ?
+        html`<a href="${this.webId}" target="_blank">WebId</a>`
+        :html``
+      }
 
       <div class="section" id="forms_section">
 
@@ -311,14 +314,13 @@ class ShexFormElement extends LitElement {
     </li>
     <li>
     You can also use your own shape url to build a form adding
-    "?shape_url=url_to_form" as parameter in the address bar<br>
-    example :
+    "?shape_url=url_to_form" as parameter in the address bar like
     <a href="${window.location}?shape_url=https://holacratie.solid.community/public/Schema/todo.shex" target="_blank">
-    ${window.location}?shape_url=https://holacratie.solid.community/public/Schema/todo.shex
+    todo.shex
     </a>
     </li>
     <li>
-    Find some more cool examples here <a href="https://holacratie.solid.community/public/Schema/" target="_blank">https://holacratie.solid.community/public/Schema/</a>
+    Find <a href="https://holacratie.solid.community/public/Schema/" target="_blank">some more cool examples here</a>
     </li>
     </ul>
 
