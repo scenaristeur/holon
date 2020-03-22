@@ -34,7 +34,7 @@ class SolidWriteElement extends LitElement {
 
       </span>`)}
       </p>
-      to do, need help, see <a href="https://github.com/scenaristeur/holon">https://github.com/scenaristeur/holon</a>
+       see <a href="https://github.com/scenaristeur/holon">https://github.com/scenaristeur/holon</a>
 
       `;
     }

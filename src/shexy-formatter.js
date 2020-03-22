@@ -78,10 +78,10 @@ let objectValue = object.value.startsWith("http") ? '<'+object.value+'>': '"'+ob
           ttlString += '<>  <'+predicate+'>  '+objectValue+'.  # Format :'+object.type+ " "+object.format+ "\n";
         }
       }
+ttlString += '<> rdf:type <'+this.shape.url+'>.'
 
       const d = new Date();
       var now = d.toUTCString()+"\n";
-
       ttlString  += "\n\n# shexy made with "+id+"\n";
       ttlString  += "# from "+location.protocol + '//' + location.host + location.pathname+"\n";
       ttlString += "# at "+now

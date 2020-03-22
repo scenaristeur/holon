@@ -53,7 +53,7 @@ class ShexFormElement extends LitElement {
     <div class="container">
 
     <form  id ="${shape.url}" ?hidden=${this.isHidden(shape.url)}>
-      WebId : ${this.webId}
+    WebId : ${this.webId}
     <legend> <h2> ${this.localName(shape.url)} </h2></legend>
 
     ${getConstraint(shape.constraint)}
@@ -61,7 +61,7 @@ class ShexFormElement extends LitElement {
     ${shape.style == "regular" ?
     html `<button
     type="button"
-    class="btn btn-primary btn-sm"
+    class="btn btn-success"
     @click="${(e) =>this.submitForm()}">
     <i class="far fa-save"></i>
     Save ${this.localName(shape.url)}
@@ -112,8 +112,9 @@ class ShexFormElement extends LitElement {
       title="${constraint.datatype}"
       name="${this.getLastPredicate()}"
       valueof="${this.getUuid()}"
+      placeholder="${constraint.datatype}"
       @click="${this.changeRadio}"
-      value= "${constraint.datatype.endsWith('date') ? this.today : ''}">
+      value= "${constraint.datatype.endsWith('date') ? this.today : constraint.datatype == 'http://www.w3.org/ns/solid/terms#webid' ? this.webId : ""}">
       </input>`
       : html``
     }
@@ -125,21 +126,8 @@ class ShexFormElement extends LitElement {
         shapeExp => html`
         ${Object.keys(shapeExp).map(key =>
           html`${key == "type"
-          ? html `<!--<span>${key}: ${shapeExp[key]}<br></span>-->`
-          : html `<!--<p>
-          <label class="flow-text">
-          <input class="form-control"
-          id="${this.setUuid()}"
-          title="${shapeExp}"
-          name="${this.getLastPredicate()}"
-          format="${key}"
-          type="radio"
-          checked />
-          <span class="flow-text teal lighten-5 darken-3-text">${key}</span>
-          ${getConstraint(shapeExp)}
-          </label>
-          </p>
-          -->
+          ? html ``
+          : html `
           <div class="form-check">
           <input class="form-check-input"
           type="radio"
@@ -154,9 +142,6 @@ class ShexFormElement extends LitElement {
           </label>
           ${getConstraint(shapeExp)}
           </div>
-
-
-
           `
         }
         `
@@ -171,18 +156,34 @@ class ShexFormElement extends LitElement {
     `
   }
   </div>`
-  : html``
-}
-${constraint.nodeKind
-  ? html`<input
-  type="text" class="form-control"
-  title="${constraint.nodeKind}"
-  placeholder="${constraint.nodeKind}"
-  name="${this.getLastPredicate()}"
-  valueof="${this.getUuid()}"
-  @click="${this.changeRadio}"
-  value = "${this.getLastPredicate() == 'http://www.w3.org/ns/solid/terms#webid' ? this.webId : ''}"
-  ></input>${getMinMax(constraint)}`
+  : html``}
+  ${constraint.nodeKind ?
+    html`${constraint.nodeKind == "literal"?
+    html`
+    <div class="form-group">
+<!--    <label for="exampleFormControlTextarea1">Example textarea</label>-->
+    <textarea
+    class="form-control"
+    id="exampleFormControlTextarea1"
+    title="${constraint.nodeKind}"
+    placeholder="${constraint.nodeKind}"
+    name="${this.getLastPredicate()}"
+    valueof="${this.getUuid()}"
+    @click="${this.changeRadio}"
+    rows="3"></textarea>
+    ${getMinMax(constraint)}
+    </div>
+    `
+    : html`<input
+    type="text" class="form-control"
+    title="${constraint.nodeKind}"
+    placeholder="${constraint.nodeKind}"
+    name="${this.getLastPredicate()}"
+    valueof="${this.getUuid()}"
+    @click="${this.changeRadio}"
+    value = "${this.getLastPredicate() == 'http://www.w3.org/ns/solid/terms#webid' ? this.webId : ''}"
+    ></input>${getMinMax(constraint)}`
+  }`
   : html``
 }
 ${constraint.reference
@@ -283,7 +284,7 @@ ${constraint.values
     ${this.shapes.map(i => html`
       ${i.style == "regular"
       ? html `
-      <button type="button" class="btn btn-primary" @click="${(e) =>this.panelClicked(i)}">
+      <button type="button" class="btn btn-info btn-sm" @click="${(e) =>this.panelClicked(i)}">
       ${this.localName(i.url)}
       </button>`
       :html ``
@@ -294,10 +295,10 @@ ${constraint.values
 
   <div class="divider" id="top_Form"></div>
   <div >
-  <button type="button" class="btn btn-primary" @click="${(e) =>this.focus("forms_section")}">Forms</button>
-  <button type="button" class="btn btn-primary" @click="${(e) =>this.focus("footprints_section")}" >Footprints</button>
+  <button type="button" class="btn btn-outline-info btn-sm" @click="${(e) =>this.focus("forms_section")}">Forms</button>
+  <button type="button" class="btn btn-outline-info btn-sm" @click="${(e) =>this.focus("footprints_section")}" >Footprints</button>
   <div class="divider"></div>
-  <div id="currentShapeDiv" class="teal-text text-darken-2">
+  <div id="currentShapeDiv">
   ${this.currentShape.url}
   </div>
   </div>
@@ -318,7 +319,7 @@ ${constraint.values
       ${i.style == "footprint"
       ? html `
       <button type="button"
-      class="btn btn-primary"
+      class="btn btn-outline-primary btn-sm"
       title=${i.url}
       @click="${(e) =>this.panelClicked(i)}"> ${this.localName(i.url)}</button>`
       : html ``
@@ -621,7 +622,7 @@ jsonFromForm(id){
               case "SELECT":
               field.value === "" ? value = field.slotvalue : ""
               break;
-      default:
+              default:
               //  console.log("NOT IMPLEMENTED",field.name, field.nodeName, field.type, "----------------",field)
             }
             console.log(field.name, value)

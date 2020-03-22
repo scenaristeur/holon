@@ -54,13 +54,13 @@ class NavElement extends LitElement {
     </style>
     <h4>${this.something}</h4>
     <div class="navbar">
-    <button type="button" class="btn btn-primary" name="tension" @click="${this.menuChanged}">Tension <i name="tension" class="fas fa-bolt"></i></button>
-
-    <button type="button" class="btn btn-primary" name="role" @click="${this.menuChanged}">Role <i name="role" class="fas fa-hat-cowboy-side"></i></button>
-        <button type="button" class="btn btn-primary" name="circle" @click=${this.menuChanged}>Cercle <i name="circle" class="fas fa-users"></i></button>
-        <button type="button" class="btn btn-primary" name="governance" @click="${this.menuChanged}">Gouvernance <i name="governance" class="far fa-handshake"></i></button>
-        <button type="button" class="btn btn-primary" name="operationnel" disabled @click="${this.menuChanged}">Operationnel <i name="operationnel" class="fab fa-think-peaks"></i></button>
-        <a href="https://igipartners.com/constitution-holacracy" target="_blank"  class="btn btn-sm btn-primary" name="operationnel" @click="${this.menuChanged}">Constitution</a>
+    <button type="button" class="btn btn-info btn-sm" name="tension" @click="${this.menuChanged}">Tension <i name="tension" class="fas fa-bolt"></i></button>
+    <button type="button" class="btn btn-secondary btn-sm" name="todo" @click="${this.menuChanged}">Todo <i name="todo" class="fas fa-clipboard-list"></i></button>
+    <button type="button" class="btn btn-info btn-sm" name="role" @click="${this.menuChanged}">Role <i name="role" class="fas fa-hat-cowboy-side"></i></button>
+    <button type="button" class="btn btn-secondary btn-sm" name="circle" @click=${this.menuChanged}>Cercle <i name="circle" class="fas fa-users"></i></button>
+    <button type="button" class="btn btn-info btn-sm" name="governance" @click="${this.menuChanged}">Gouvernance <i name="governance" class="far fa-handshake"></i></button>
+    <a href="https://labdsurlholacracy.com/flipbook-fullscreen/#page-28-29" target="_blank">
+    <button type="button" class="btn btn-danger btn-sm">WTF <i class="fab fa-think-peaks"></i></button></a>
 
 
     </div>
@@ -84,12 +84,12 @@ class NavElement extends LitElement {
         }
       }
     };
-  //  this.agent.send(this.destinataire, {action:"menuChanged", menu: "role"});
+    //  this.agent.send(this.destinataire, {action:"menuChanged", menu: "role"});
   }
 
   menuChanged(e){
     var app = this
-      console.log(e.target.name)
+    console.log(e.target.name)
     this.menu=e.target.name
     let menus = this.shadowRoot.querySelectorAll(".navbar a")
     menus.forEach((m, i) => {
