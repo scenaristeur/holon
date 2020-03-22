@@ -333,6 +333,20 @@ firstUpdated(){
         case "webIdChanged":
         app.webIdChanged(message.webId)
         break;
+        case "updateSelects":
+        let selects = app.shadowRoot.querySelectorAll("select")
+        //console.log(selects)
+        for (var select of selects) {
+          let url = select.getAttribute("url")
+
+          if (url != null){
+            var i, L = select.options.length - 1;
+            for(i = L; i >= 0; i--) {
+              select.remove(i);
+            }
+          }}
+        app.updateSelects()
+        break;
         case "shapeUrlChanged":
         app.load_schema(message.shape_url)
         break;
@@ -393,16 +407,16 @@ load_schema(shape_url){
 parseSchema(schema){
   var app = this;
   //  var schema = JSON.parse(this.schema)
-  console.log(schema)
-  console.log(schema.start)
-  console.log(schema.shapes)
+//  console.log(schema)
+//  console.log(schema.start)
+  //console.log(schema.shapes)
   this.shapes = []
   this.counter = 0;
   this.footprint_shapes = []
-  console.log(this.shapes)
+  //console.log(this.shapes)
 
   for (let [url, constraint] of Object.entries(schema.shapes)) {
-    console.log(url)
+    //console.log(url)
     var shap = {}
     shap.url = url;
     shap.constraint = constraint
@@ -419,9 +433,8 @@ parseSchema(schema){
 }
 
 submitForm(){
-
   var id = this.currentShape.url
-    console.log(this.selectFolder[id])
+  delete(this.selectFolder[id])
   var formData =   this.jsonFromForm(id)
   console.log("fdata",formData)
   var id_footprint = id+"_Footprint"
@@ -436,6 +449,7 @@ submitForm(){
   //  data[id].footprint = footprintData
   this.data = data
   console.log(this.data)
+
 }
 
 jsonFromForm(id){
@@ -450,18 +464,18 @@ jsonFromForm(id){
     for( var i=0; i<currentFormFields.length; i++ ){
       var field = currentFormFields[i]
       if  ((field.nodeName != "FIELDSET") && (field.nodeName != "BUTTON")){
-       console.log("\n----------------")
-           console.log("lastfield",lastField.type, lastField.checked);
-          let selected =  (lastField.type != "radio"  || lastField.checked == true) && (field.type != "radio")
-          if(selected){
-            console.log(selected,field.type, field.nodeName, field.name, field.id, field.value, field.slotvalue, field)
-              var fieldData = {}
-            fieldData.value =  field.value.trim()
-            fieldData.type = field.type || "unknown";
-            fieldData.format = field.placeholder || "unknown";
-            console.log(fieldData)
-            params[field.name] = fieldData;
-          }
+        // console.log("\n----------------")
+        // console.log("lastfield",lastField.type, lastField.checked);
+        let selected =  (lastField.type != "radio"  || lastField.checked == true) && (field.type != "radio")
+        if(selected){
+          //  console.log(selected,field.type, field.nodeName, field.name, field.id, field.value, field.slotvalue, field)
+          var fieldData = {}
+          fieldData.value =  field.value.trim()
+          fieldData.type = field.type || "unknown";
+          fieldData.format = field.placeholder || "unknown";
+          //  console.log(fieldData)
+          params[field.name] = fieldData;
+        }
         lastField = field
       }
     }
@@ -473,25 +487,31 @@ jsonFromForm(id){
 updated(props){
   let selects = this.shadowRoot.querySelectorAll("select")
   if (selects.length > 0){
-    this.updateSelects(selects)
+    this.updateSelects()
   }
   // todo select first of each radio group by default let radios =
 }
 
-async updateSelects(selects){
+async updateSelects(){
+  let selects = this.shadowRoot.querySelectorAll("select")
+  //console.log(selects)
   for (var select of selects) {
     let url = select.getAttribute("url")
+
     if (select.options.length == 0 && url != null){
-      //  console.log("SELECT" , select)
+        //  console.log("SELECT" , select)
       let folder = this.selectFolder[url]
+      //  console.log("FOLDER",folder)
       if (folder == undefined) {
         folder  = await this.getFilesFrom(url)
         //  console.log("##FILES", folder)
         this.selectFolder[url] = folder
+
       }
       else{
-        console.log("I KNOW ", url)
+      //  console.log("I KNOW ", url)
       }
+
       var option = document.createElement("option");
       option.text = "Choose one "+this.localName(url);
       option.value = undefined
@@ -508,7 +528,7 @@ async updateSelects(selects){
 
 
 async getFilesFrom(url){
-  console.log("@@@@@@@@@@@",url)
+  //console.log("@@@@@@@@@@@",url)
   return this.fileClient.readFolder(url).then(folder => {
     return  folder
   },

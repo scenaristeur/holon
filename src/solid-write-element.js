@@ -89,8 +89,8 @@ class SolidWriteElement extends LitElement {
       var url = root+path+"/"+this.ttl.filename;*/
       var fileUrl = this.ttl.shape.url+"/"+this.ttl.filename
       console.log(fileUrl)
-      console.log(this.fileClient)
-      console.log("WebId",this.webId)
+    //  console.log(this.fileClient)
+    //  console.log("WebId",this.webId)
       this.fileClient.createFile(fileUrl, this.ttl.content, "text/turtle").then( fileCreated => {
         /*  result.status = "created"
         result.file = fileCreated
@@ -99,6 +99,7 @@ class SolidWriteElement extends LitElement {
         console.log(`Created file ${fileCreated}.`);
         alert(fileCreated.url +" "+fileCreated.statusText)
         app.fileUrl = fileCreated.url
+        app.agent.send("ShexForm", {action: "updateSelects"})
         //  log (fileCreated, "Created file")
       },
       err => {

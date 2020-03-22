@@ -42,7 +42,7 @@ class ShexyFormatter extends LitElement {
   }
 
   processData(){
-    console.log(this.data)
+//  console.log(this.data)
     var ttlFile  = {}
     var ttlString = "@prefix : <#>.\n"
   //  +  "@prefix : <https://holacratie.solid.community/public/> .\n"
@@ -63,13 +63,12 @@ class ShexyFormatter extends LitElement {
       var id = shape
       /*  this.formData[id].forEach(function(enreg){
       if (enreg.submitted == undefined) {*/
-      console.log("newfile ttl")
       var randomName = '_' + Math.random().toString(36).substr(2, 9);
       var filename = randomName
       //  var ttlString = app.ttlBase
 
       for (let [predicate, object] of Object.entries(data.form)) {
-        console.log(predicate, object)
+        //console.log(predicate, object)
         if( object.value != undefined && object.value.length > 0){
           if ((predicate == "https://schema.org/name") &&  (object.value.length > 0)){
             var underName  = object.value.split(' ').join('_');
@@ -77,7 +76,7 @@ class ShexyFormatter extends LitElement {
             ttlString += ':this  rdfs:label  "'+object.value+'".\n'
             ttlString += ':this  purl:title  "'+object.value+'".\n'
           }
-          console.log(predicate, object);
+          //console.log(predicate, object);
           let objectValue = object.value.startsWith("http") ? '<'+object.value+'>': '"'+object.value+'"';
           ttlString += ':this  <'+predicate+'>  '+objectValue+'.  # Format :'+object.type+ " "+object.format+ "\n";
         }
@@ -101,7 +100,6 @@ class ShexyFormatter extends LitElement {
     /* commenter POUR DEBUG */
     ttlFile = { filename: filename , content: ttlString, footprint: data.footprint, shape: this.shape}
 
-    console.log("TTLFILE",ttlFile)
     console.log("TODO : Process footprint")
     this.ttl=ttlFile
     console.log(this.ttl)
