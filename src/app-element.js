@@ -15,7 +15,7 @@ class AppElement extends LitElement {
 
   constructor() {
     super();
-    this.something = "App Element"
+    this.something = "Shexy : From ShEx shapes to Holacratic Linked Forms ! "
 
   }
 

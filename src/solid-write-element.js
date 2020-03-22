@@ -24,8 +24,13 @@ class SolidWriteElement extends LitElement {
 
   render(){
     return html`
-    <h4>${this.something}</h4>
-    <a href="${this.fileUrl}" target="_blank">${this.fileUrl}</a> :
+    <style>
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    </style>
+    <a href="${this.fileUrl}" target="_blank">${this.fileUrl}</a><br>
     <pre>${this.ttl.content}</pre>
     <p>
     ${Object.keys(this.ttl).map(item =>
@@ -34,7 +39,7 @@ class SolidWriteElement extends LitElement {
 
       </span>`)}
       </p>
-       see <a href="https://github.com/scenaristeur/holon">https://github.com/scenaristeur/holon</a>
+      see <a href="https://github.com/scenaristeur/holon">https://github.com/scenaristeur/holon</a>
 
       `;
     }
@@ -89,8 +94,8 @@ class SolidWriteElement extends LitElement {
       var url = root+path+"/"+this.ttl.filename;*/
       var fileUrl = this.ttl.shape.url+"/"+this.ttl.filename
       console.log(fileUrl)
-    //  console.log(this.fileClient)
-    //  console.log("WebId",this.webId)
+      //  console.log(this.fileClient)
+      //  console.log("WebId",this.webId)
       this.fileClient.createFile(fileUrl, this.ttl.content, "text/turtle").then( fileCreated => {
         /*  result.status = "created"
         result.file = fileCreated
@@ -99,7 +104,7 @@ class SolidWriteElement extends LitElement {
         console.log(`Created file ${fileCreated}.`);
         alert(fileCreated.url +" "+fileCreated.statusText)
         app.fileUrl = fileCreated.url
-        app.agent.send("ShexForm", {action: "updateSelects"})
+        app.agent.send("ShexForm", {action: "fileWriten"})
         //  log (fileCreated, "Created file")
       },
       err => {

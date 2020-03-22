@@ -17,7 +17,8 @@ class ShexFormElement extends LitElement {
       data :{type : Object},
       webId: {type: String},
       today: {type: String},
-      selectFolder: {type: Object}
+      selectFolder: {type: Object},
+      formHistory: {type: Array}
     };
   }
 
@@ -35,6 +36,7 @@ class ShexFormElement extends LitElement {
     let d = new Date();
     this.today = d.toISOString().substr(0, 10);
     this.selectFolder = {}
+    this.formHistory = []
   }
 
   render(){
@@ -55,7 +57,7 @@ class ShexFormElement extends LitElement {
     <div class="container">
 
     <form  id ="${shape.url}" ?hidden=${this.isHidden(shape.url)}>
-    WebId : ${this.webId}
+
     <legend> <h2> ${this.localName(shape.url)} </h2></legend>
 
     ${getConstraint(shape.constraint)}
@@ -101,7 +103,10 @@ class ShexFormElement extends LitElement {
       : html``
     }
     ${constraint.predicate ?
-      html`<label  title="${this.toText(constraint)}">${this.setLastPredicate(constraint.predicate)}</label>`
+      html`<h4
+      title="${this.toText(constraint)}"
+      name="${this.setUuid()}"
+      >${this.setLastPredicate(constraint.predicate)}</h4>`
       : html``
     }
     ${constraint.valueExpr ?
@@ -109,7 +114,7 @@ class ShexFormElement extends LitElement {
       : html``
     }
     ${constraint.datatype ?
-      html ` <input type="${constraint.datatype.endsWith('date') ? 'date' : 'text'}"
+      html ` <input type="${this.inputType(constraint.datatype)}"
       class="form-control"
       title="${constraint.datatype}"
       name="${this.getLastPredicate()}"
@@ -129,14 +134,12 @@ class ShexFormElement extends LitElement {
         ${Object.keys(shapeExp).map(key =>
           html`${key == "type"
           ? html ``
-          : html `
-          <div class="form-check">
+          : html `<div class="form-check">
           <input class="form-check-input"
           type="radio"
           name="${this.getLastPredicate()}"
           id="${this.setUuid()}"
           format="${key}"
-          value="option1"
           title="${shapeExp}"
           checked>
           <label class="form-check-label" for="${this.getUuid()}">
@@ -144,271 +147,295 @@ class ShexFormElement extends LitElement {
           </label>
           ${getConstraint(shapeExp)}
           </div>
-          `
-        }
-        `
+          `}`
+        )
+      }
+      `)}
+      </fieldset>`
+      : html `${constraint.shapeExprs.map(
+        shapeExp => html`${getConstraint(shapeExp)}`
       )}
       `
-    )}
-    </fieldset>
-    `
-    : html `${constraint.shapeExprs.map(
-      shapeExp => html`${getConstraint(shapeExp)}`
-    )}
-    `
-  }
-  </div>`
-  : html``}
-  ${constraint.nodeKind ?
-    html`${constraint.nodeKind == "literal"?
-    html`
-    <div class="form-group">
-    <!--    <label for="exampleFormControlTextarea1">Example textarea</label>-->
-    <textarea
-    class="form-control"
-    id="exampleFormControlTextarea1"
-    title="${constraint.nodeKind}"
-    placeholder="${constraint.nodeKind}"
-    name="${this.getLastPredicate()}"
-    valueof="${this.getUuid()}"
-    @click="${this.changeRadio}"
-    rows="3"></textarea>
-    ${getMinMax(constraint)}
-    </div>
-    `
-    : html`<input
-    type="text" class="form-control"
-    title="${constraint.nodeKind}"
-    placeholder="${constraint.nodeKind}"
-    name="${this.getLastPredicate()}"
-    valueof="${this.getUuid()}"
-    @click="${this.changeRadio}"
-    value = "${this.getLastPredicate() == 'http://www.w3.org/ns/solid/terms#webid' ? this.webId : ''}"
-    ></input>${getMinMax(constraint)}`
-  }`
-  : html``
-}
-${constraint.reference
-  ? html`
-  <!--
-  <input type="text" class="validate teal lighten-5"
-  placeholder="${constraint.reference}"
-  title="${constraint.reference}"
-  label="${constraint.reference}"
-  value="${constraint.reference}"
-  name="${this.getLastPredicate()}"
-  valueof="${this.getUuid()}"
-  @click="${this.changeRadio}"
-  ></input>
-  -->
-  <select
-  class="custom-select"
-  url="${constraint.reference}"
-  name="${this.getLastPredicate()}"
-  valueof="${this.getUuid()}"
-  @click="${this.changeRadio}"
-  placeholder="${constraint.reference}"
-  title="${constraint.reference}"
-  label="${constraint.reference}"
-  >
-  </select>
-
-  <br>
-  <a href="${constraint.reference}"
-  title="See existing ${this.localName(constraint.reference)} at ${constraint.reference}"
-  target="blank">
-  <i class="far fa-eye"></i> View
-  </a>
-  <a href="#"
-  title="Create a ${constraint.reference}"
-  @click="${(e) =>this.displayForm(constraint.reference)}">
-  <i class="fas fa-plus-circle"></i> Create
-  </a>
-  <br>  `
-  : html``
-}
-${constraint.values
-  ? html`<select class="custom-select"
-  @change="${this.selectorChange}"
-  valueof="${this.getUuid()}"
-  title="${this.toText(constraint)}"
-  name="${this.getLastPredicate()}"
-  placeholder = "value">
-  ${constraint.values.map(i => html`
-    <option value="${i.value||i}"  >${i.value || i}</option>
-    `)}
-    </select>${getMinMax(constraint)}
-    `
+    }
+    </div>`
+    : html``}
+    ${constraint.nodeKind ?
+      html`${constraint.nodeKind == "literal"?
+      html`
+      <div class="form-group">
+      <!--    <label for="exampleFormControlTextarea1">Example textarea</label>-->
+      <textarea
+      class="form-control"
+      id="exampleFormControlTextarea1"
+      title="${constraint.nodeKind}"
+      placeholder="${constraint.nodeKind}"
+      name="${this.getLastPredicate()}"
+      valueof="${this.getUuid()}"
+      @click="${this.changeRadio}"
+      rows="3"></textarea>
+      ${getMinMax(constraint)}
+      </div>
+      `
+      : html`<input
+      type="text" class="form-control"
+      title="${constraint.nodeKind}"
+      placeholder="${constraint.nodeKind}"
+      name="${this.getLastPredicate()}"
+      valueof="${this.getUuid()}"
+      @click="${this.changeRadio}"
+      value = "${this.getLastPredicate() == 'http://www.w3.org/ns/solid/terms#webid' ? this.webId : ''}"
+      ></input>${getMinMax(constraint)}`
+    }`
     : html``
   }
-  ${this.isFieldset(constraint.type)
-    ? html `</fieldset>`
-    :html ``
+  ${constraint.reference
+    ? html`
+    <!--
+    <input type="text" class="validate teal lighten-5"
+    placeholder="${constraint.reference}"
+    title="${constraint.reference}"
+    label="${constraint.reference}"
+    value="${constraint.reference}"
+    name="${this.getLastPredicate()}"
+    valueof="${this.getUuid()}"
+    @click="${this.changeRadio}"
+    ></input>
+    -->
+    <select
+    class="custom-select"
+    url="${constraint.reference}"
+    name="${this.getLastPredicate()}"
+    valueof="${this.getUuid()}"
+    @click="${this.changeRadio}"
+    placeholder="${constraint.reference}"
+    title="${constraint.reference}"
+    label="${constraint.reference}"
+    >
+    </select>
+
+    <br>
+    <a href="${constraint.reference}"
+    title="See existing ${this.localName(constraint.reference)} at ${constraint.reference}"
+    target="blank">
+    <i class="far fa-eye"></i> View
+    </a>
+    <a href="#"
+    title="Create a ${constraint.reference}"
+    @click="${(e) =>this.displayForm(constraint.reference)}">
+    <i class="fas fa-plus-circle"></i> Create
+    </a>
+    <br>  `
+    : html``
   }
-  `
+  ${constraint.values
+    ? html`<select class="custom-select"
+    @change="${this.selectorChange}"
+    valueof="${this.getUuid()}"
+    title="${this.toText(constraint)}"
+    name="${this.getLastPredicate()}"
+    placeholder = "value">
+    ${constraint.values.map(i => html`
+      <option value="${i.value||i}"  >${i.value || i}</option>
+      `)}
+      </select>${getMinMax(constraint)}
+      `
+      : html``
+    }
+    ${this.isFieldset(constraint.type)
+      ? html `</fieldset>`
+      :html ``
+    }
+    `
 
-  return html`
-  <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" >
-  <link href="css/fontawesome/css/all.css" rel="stylesheet">
-  <div class="container">
+    return html`
+    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" >
+    <link href="css/fontawesome/css/all.css" rel="stylesheet">
+    <div class="container">
 
 
 
-  ${this.shape_url != undefined && this.shape_url.length > 0 ?
-    html`Form : ${this.shape_url}`
-    :html`You can use your own shape url to build a form adding
+    ${this.shape_url != undefined && this.shape_url.length > 0 ?
+      html`Form : <a href="${this.shape_url}" target="_blank">${this.shape_url}</a><br>
+      Shape url : <a href="${this.currentShape.url}" target="_blank">${this.currentShape.url}</a><br>
+      WebId : ${this.webId}
+
+      <div class="section" id="forms_section">
+
+      <div  class="row">
+      ${this.shapes.map(i => html`
+        ${i.style == "regular"
+        ? html `
+        <button type="button" class="btn btn-info btn-sm" @click="${(e) =>this.panelClicked(i)}">
+        ${this.localName(i.url)}
+        </button>`
+        :html ``
+      }`
+    )}
+    </div>
+    </div>
+
+    <div class="divider" id="top_Form"></div>
+    <div >
+    <button type="button" class="btn btn-outline-info btn-sm" @click="${(e) =>this.focus("forms_section")}">Forms</button>
+    <button type="button" class="btn btn-outline-info btn-sm" @click="${(e) =>this.focus("footprints_section")}" >Footprints</button>
+    <div class="divider"></div>
+    <div id="currentShapeDiv"></div>
+    </div>
+    ${this.shapes.map(shape => html`
+      ${getShape(shape)}
+      `)}
+
+      <div class="divider"></div>
+      <div class="section" id="footprints_section">
+      <h5>Footprints</h5>
+      <p>To change the storage location of this data, use the "_Footprint" before submitting</p>
+      <div class="row center-align">
+      ${this.shapes.map(i => html`
+        ${i.style == "footprint"
+        ? html `
+        <button type="button"
+        class="btn btn-outline-primary btn-sm"
+        title="${i.url}"
+        @click="${(e) =>this.panelClicked(i)}"> ${this.localName(i.url)}</button>`
+        : html ``
+      }`
+    )}
+    </div>
+    </div>
+    </div>
+    `
+    :html`
+    <ul>
+    <li>
+    Hello, here you can use some Linked Forms dealing with Holacracy on "Solid Project" platform, prepared just form you, just click on one bottom menu button.
+    </li>
+    <li>
+    You can also use your own shape url to build a form adding
     "?shape_url=url_to_form" as parameter in the address bar<br>
     example :
     <a href="${window.location}?shape_url=https://holacratie.solid.community/public/Schema/todo.shex" target="_blank">
     ${window.location}?shape_url=https://holacratie.solid.community/public/Schema/todo.shex
     </a>
-    <br>
-    Find some examples here <a href="https://holacratie.solid.community/public/Schema/"
+    </li>
+    <li>
+    Find some more cool examples here <a href="https://holacratie.solid.community/public/Schema/" target="_blank">https://holacratie.solid.community/public/Schema/</a>
+    </li>
+    </ul>
+
     `}
 
-    <div class="section" id="forms_section">
-    <h5>Forms</h5>
-    <div  class="row">
-    ${this.shapes.map(i => html`
-      ${i.style == "regular"
-      ? html `
-      <button type="button" class="btn btn-info btn-sm" @click="${(e) =>this.panelClicked(i)}">
-      ${this.localName(i.url)}
-      </button>`
-      :html ``
-    }`
-  )}
-  </div>
-  </div>
+    <shexy-formatter
+    name="ShexyFormatter"
+    .shape="${this.currentShape}"
+    .data="${this.data}"
+    ></shexy-formatter>
+    `;
+  }
 
-  <div class="divider" id="top_Form"></div>
-  <div >
-  <button type="button" class="btn btn-outline-info btn-sm" @click="${(e) =>this.focus("forms_section")}">Forms</button>
-  <button type="button" class="btn btn-outline-info btn-sm" @click="${(e) =>this.focus("footprints_section")}" >Footprints</button>
-  <div class="divider"></div>
-  <div id="currentShapeDiv">
-  ${this.currentShape.url}
-  </div>
-  </div>
-  ${this.shapes.map(shape => html`
-    ${getShape(shape)}
-    `)}
-
-    <div class="divider"></div>
-    <div class="section" id="footprints_section">
-    <h5>Footprints</h5>
-    <p>To change the storage location of this data, use the "_Footprint" before submitting</p>
-    <div class="row center-align">
-    ${this.shapes.map(i => html`
-      ${i.style == "footprint"
-      ? html `
-      <button type="button"
-      class="btn btn-outline-primary btn-sm"
-      title=${i.url}
-      @click="${(e) =>this.panelClicked(i)}"> ${this.localName(i.url)}</button>`
-      : html ``
-    }`
-  )}
-  </div>
-  </div>
-  </div>
-
-  <shexy-formatter
-  name="ShexyFormatter"
-  .shape="${this.currentShape}"
-  .data="${this.data}"
-  ></shexy-formatter>
-  `;
-}
-
-firstUpdated(){
-  var app = this;
-  this.agent = new HelloAgent(this.name);
-  console.log(this.agent)
-  this.agent.receive = function(from, message) {
-    //  console.log("messah",message)
-    if (message.hasOwnProperty("action")){
-      //  console.log(message)
-      switch(message.action) {
-        case "webIdChanged":
-        app.webIdChanged(message.webId)
-        break;
-        case "updateSelects":
-        let selects = app.shadowRoot.querySelectorAll("select")
-        //console.log(selects)
-        for (var select of selects) {
-          let url = select.getAttribute("url")
-
-          if (url != null){
-            var i, L = select.options.length - 1;
-            for(i = L; i >= 0; i--) {
-              select.remove(i);
-            }
-          }}
-        app.updateSelects()
-        break;
-        case "shapeUrlChanged":
-        app.load_schema(message.shape_url)
-        break;
-        default:
-        console.log("Unknown action ",message)
+  firstUpdated(){
+    var app = this;
+    this.agent = new HelloAgent(this.name);
+    console.log(this.agent)
+    this.agent.receive = function(from, message) {
+      //  console.log("messah",message)
+      if (message.hasOwnProperty("action")){
+        //  console.log(message)
+        switch(message.action) {
+          case "webIdChanged":
+          app.webIdChanged(message.webId)
+          break;
+          case "fileWriten":
+          app.fileWriten()
+          break;
+          case "shapeUrlChanged":
+          app.load_schema(message.shape_url)
+          break;
+          default:
+          console.log("Unknown action ",message)
+        }
       }
+    };
+
+    let params = this.recupParams()
+    console.log("Params",params)
+    if(params.shape_url != undefined && params.shape_url.length > 0){
+      this.shape_url = params.shape_url
+      this.load_schema(this.shape_url)
     }
-  };
 
-  let params = this.recupParams()
-  console.log("Params",params)
-  if(params.shape_url != undefined && params.shape_url.length > 0){
-    this.shape_url = params.shape_url
-    this.load_schema(this.shape_url)
   }
 
-}
-
-recupParams(){
-  //console.log(window.location)
-  var url = window.location.search+window.location.hash;  // pour catcher les /card#me
-  var params = (function(a) {
-    if (a == "") return {};
-    var b = {};
-    for (var i = 0; i < a.length; ++i)
-    {        var p=a[i].split('=', 2);
-    if (p.length == 1)
-    b[p[0]] = "";
-    else
-    b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
-  }
-  return b;
-})(url.substr(1).split('&'));
-return params;
-}
-
-
-load_schema(shape_url){
-  let app = this
-  this.shape_url = shape_url
-  console.log(shape_url)
-
-  this.shex.Loader.load([shape_url], [], [], []).then(loaded => {
-    if (loaded.schema){
-      console.log("LOADED",loaded.schema)
-      //  app.schema = JSON.stringify(loaded.schema);
-      app.parseSchema(loaded.schema)
-      //  console.log(Object.entries(loaded.schema.shapes))
+  fileWriten(){
+    let currentShapeUrl = this.currentShape.url
+    delete(this.selectFolder[currentShapeUrl])
+    if (this.formHistory.length > 0){
+      let precedentShape = this.formHistory.pop()
+      this.currentShape = precedentShape
+      this.focus("top_Form")
     }
-  }, err => {
-    //  log(err, "ERROR loadShex")
-    console.log("erreur ",err)
-    alert(err.message)
+
+
+    let selects = this.shadowRoot.querySelectorAll("select")
+    //console.log(selects)
+    for (var select of selects) {
+      let url = select.getAttribute("url")
+
+      if (url == currentShapeUrl){
+        console.log("clear select with ",currentShapeUrl)
+        var i, L = select.options.length - 1;
+        for(i = L; i >= 0; i--) {
+          select.remove(i);
+        }
+      }}
+      this.updateSelects()
+
+
+    }
+
+    recupParams(){
+      //console.log(window.location)
+      var url = window.location.search+window.location.hash;  // pour catcher les /card#me
+      var params = (function(a) {
+        if (a == "") return {};
+        var b = {};
+        for (var i = 0; i < a.length; ++i)
+        {        var p=a[i].split('=', 2);
+        if (p.length == 1)
+        b[p[0]] = "";
+        else
+        b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
+      }
+      return b;
+    })(url.substr(1).split('&'));
+    return params;
   }
-);
+
+
+  load_schema(shape_url){
+    let app = this
+    this.shape_url = shape_url
+    console.log(shape_url)
+
+    this.shex.Loader.load([shape_url], [], [], []).then(loaded => {
+      if (loaded.schema){
+        console.log("LOADED",loaded.schema)
+        //  app.schema = JSON.stringify(loaded.schema);
+        app.parseSchema(loaded.schema)
+        //  console.log(Object.entries(loaded.schema.shapes))
+      }
+    }, err => {
+      //  log(err, "ERROR loadShex")
+      console.log("erreur ",err)
+      alert(err.message)
+    }
+  );
 }
 
-parseSchema(schema){
+async parseSchema(schema){
   var app = this;
   //  var schema = JSON.parse(this.schema)
-//  console.log(schema)
-//  console.log(schema.start)
+  //  console.log(schema)
+  //  console.log(schema.start)
   //console.log(schema.shapes)
   this.shapes = []
   this.counter = 0;
@@ -429,12 +456,14 @@ parseSchema(schema){
     //  this.focus();
   }
   console.log("SHSHSHSHS",app.shapes)
-  this.requestUpdate()
+  await   this.requestUpdate()
+  console.log("updated")
+  await this.updateSelects()
 }
 
 submitForm(){
   var id = this.currentShape.url
-  delete(this.selectFolder[id])
+
   var formData =   this.jsonFromForm(id)
   console.log("fdata",formData)
   var id_footprint = id+"_Footprint"
@@ -449,6 +478,7 @@ submitForm(){
   //  data[id].footprint = footprintData
   this.data = data
   console.log(this.data)
+
 
 }
 
@@ -485,11 +515,11 @@ jsonFromForm(id){
 }
 
 updated(props){
-  let selects = this.shadowRoot.querySelectorAll("select")
+  /*let selects = this.shadowRoot.querySelectorAll("select")
   if (selects.length > 0){
-    this.updateSelects()
-  }
-  // todo select first of each radio group by default let radios =
+  this.updateSelects()
+}*/
+// todo select first of each radio group by default let radios =
 }
 
 async updateSelects(){
@@ -499,31 +529,31 @@ async updateSelects(){
     let url = select.getAttribute("url")
 
     if (select.options.length == 0 && url != null){
-        //  console.log("SELECT" , select)
+      //  console.log("SELECT" , select)
       let folder = this.selectFolder[url]
       //  console.log("FOLDER",folder)
       if (folder == undefined) {
         folder  = await this.getFilesFrom(url)
         //  console.log("##FILES", folder)
         this.selectFolder[url] = folder
-
-      }
-      else{
-      //  console.log("I KNOW ", url)
-      }
-
-      var option = document.createElement("option");
-      option.text = "Choose one "+this.localName(url);
-      option.value = undefined
-      select.add(option);
-      folder.folders.forEach((f, i) => {
         var option = document.createElement("option");
-        option.text = f.name;
-        option.value = f.url
+        option.text = "Choose one "+this.localName(url);
+        option.value = undefined
         select.add(option);
-      });
-    }
+        folder.folders.forEach((f, i) => {
+          var option = document.createElement("option");
+          option.text = f.name;
+          option.value = f.url
+          select.add(option);
+        });
+      }
+      /*  else{
+      console.log("I KNOW ", url)
+    }*/
+
+
   }
+}
 }
 
 
@@ -552,6 +582,21 @@ return files
 webIdChanged(webId){
   this.webId = webId
 }
+
+inputType(datatype){
+  //  console.log("datatype",datatype)
+  switch (datatype) {
+    case "http://www.w3.org/2001/XMLSchema#date":
+    return 'date'
+    break;
+    case "http://www.w3.org/2001/XMLSchema#decimal":
+    return 'number'
+    break;
+    default:
+    return 'text'
+  }
+}
+
 
 setUuid(){
   this.uuid =  '_' + Math.random().toString(36).substr(2, 9);
@@ -610,6 +655,8 @@ toText(json){
 
   displayForm(id){
     console.log("displayForm",id)
+    this.formHistory = [...this.formHistory, this.currentShape]
+    console.log("form history", this.formHistory)
     var fictiveShape = {}
     fictiveShape.url = id
     this.currentShape = fictiveShape

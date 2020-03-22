@@ -1,5 +1,5 @@
 # holon
-
+- vocabs https://lod-cloud.net/
 
 
 # Install
@@ -20,6 +20,9 @@ git add dist -f && git commit -m "Initial dist subtree commit"
 ```
 git subtree push --prefix dist origin gh-pages
 ```
+
+# todo
+bootstrap auto complete https://bootstrap-autocomplete.readthedocs.io/en/latest/
 
 # see similar project
 https://github.com/inrupt/solid-sdk-forms
@@ -56,7 +59,14 @@ ${(this.shape_url != undefined && this.shape_url.length > 0) ?
   http://localhost:9001/?shape_url=https://holacratie.solid.community/public/Schema/todo.shex
 
 
+# ecolocracy
+https://theecologist.org/2019/feb/15/why-we-need-ecolocracy
 
+https://www.process.st/organizational-structure/
+
+https://www.holacracy.org/glossary
+
+https://www.cmswire.com/social-business/checking-in-on-holacracy/
 
 
 

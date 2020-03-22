@@ -6,7 +6,6 @@ class NavElement extends LitElement {
   static get properties() {
     return {
       name: {type: String},
-      something: {type: String},
       menu: {type: String},
       destinataire: {type: String}
     };
@@ -14,7 +13,6 @@ class NavElement extends LitElement {
 
   constructor() {
     super();
-    this.something = "Nav Element"
     this.menu = ""
     this.destinataire = ""
   }
@@ -52,8 +50,7 @@ class NavElement extends LitElement {
       color: white;
     }
     </style>
-    <h4>${this.something}</h4>
-    <div class="navbar">
+      <div class="navbar">
     <button type="button" class="btn btn-info btn-sm" name="tension" @click="${this.menuChanged}">Tension <i name="tension" class="fas fa-bolt"></i></button>
     <button type="button" class="btn btn-secondary btn-sm" name="todo" @click="${this.menuChanged}">Todo <i name="todo" class="fas fa-clipboard-list"></i></button>
     <button type="button" class="btn btn-info btn-sm" name="role" @click="${this.menuChanged}">Role <i name="role" class="fas fa-hat-cowboy-side"></i></button>
@@ -61,8 +58,6 @@ class NavElement extends LitElement {
     <button type="button" class="btn btn-info btn-sm" name="governance" @click="${this.menuChanged}">Gouvernance <i name="governance" class="far fa-handshake"></i></button>
     <a href="https://labdsurlholacracy.com/flipbook-fullscreen/#page-28-29" target="_blank">
     <button type="button" class="btn btn-danger btn-sm">WTF <i class="fab fa-think-peaks"></i></button></a>
-
-
     </div>
     `;
   }
