@@ -18,7 +18,8 @@ class ShexFormElement extends LitElement {
       webId: {type: String},
       today: {type: String},
       selectFolder: {type: Object},
-      formHistory: {type: Array}
+      formHistory: {type: Array},
+      liste: {type: Array}
     };
   }
 
@@ -37,6 +38,7 @@ class ShexFormElement extends LitElement {
     this.today = d.toISOString().substr(0, 10);
     this.selectFolder = {}
     this.formHistory = []
+    this.liste = []
   }
 
   render(){
@@ -58,262 +60,288 @@ class ShexFormElement extends LitElement {
 
     <form  id ="${shape.url}" ?hidden=${this.isHidden(shape.url)}>
 
-    <legend> <h2> ${this.localName(shape.url)} </h2></legend>
-
-    ${getConstraint(shape.constraint)}
-
+    <legend>
+    <h2> ${this.localName(shape.url)}
     ${shape.style == "regular" ?
-    html `<br><button
-    type="button"
-    class="btn btn-success"
-    @click="${(e) =>this.submitForm()}">
-    <i class="far fa-save"></i>
-    Save ${this.localName(shape.url)}
-    </button>`
-    : html `<br>
+    html `
     <button
     type="button"
-    class="btn btn-primary btn-sm"
-    @click="${(e) =>this.displayForm(shape.url.replace('_Footprint', ''))}">
-    <i class="fas fa-backward"></i>
-    Back to ${this.localName(shape.url.replace('_Footprint', ''))} Form
+    class="btn btn-success" @click="${this.showList}">
+    <i class="fas fa-list-ul"></i>
     </button>
-    `}
-    </form>
-    </div>
     `
+    :html``
+  }
+  </h2>
+  </legend>
 
-    const getConstraint = (constraint) => html`
-    ${constraint.type ?
-      html ``
-      :html`type non défini : ${this.toText(constraint)}`
-    }
-    ${this.isFieldset(constraint.type) ?
-      html `<fieldset>
-      <legend><span title="${this.toText(constraint)}">${constraint.type}</span></legend>
-      `
-      :html ``
-    }
-    ${constraint.expression ?
-      html`${getConstraint(constraint.expression)}`
-      : html``
-    }
-    ${constraint.expressions ?
-      html`${constraint.expressions.map(i => html`${getConstraint(i)}`)}`
-      : html``
-    }
-    ${constraint.predicate ?
-      html`<h4
-      title="${this.toText(constraint)}"
-      name="${this.setUuid()}"
-      >${this.setLastPredicate(constraint.predicate)}</h4>`
-      : html``
-    }
-    ${constraint.valueExpr ?
-      html`${getConstraint(constraint.valueExpr)}`
-      : html``
-    }
-    ${constraint.datatype ?
-      html ` <input type="${this.inputType(constraint.datatype)}"
-      class="form-control"
-      title="${constraint.datatype}"
-      name="${this.getLastPredicate()}"
-      valueof="${this.getUuid()}"
-      placeholder="${this.localName(constraint.datatype)}"
-      @click="${this.changeRadio}"
-      value= "${constraint.datatype.endsWith('date') ? this.today : constraint.datatype == 'http://www.w3.org/ns/solid/terms#webid' ? this.webId : ""}">
-      </input>`
-      : html``
-    }
-    ${constraint.shapeExprs
-      ? html`<div title="${this.toText(constraint)}">
-      ${constraint.type == "ShapeOr"
-      ?html `<fieldset class="teal lighten-4"><legend class="teal lighten-4"><h6> Choose one of</h6></legend>
-      ${constraint.shapeExprs.map(
-        shapeExp => html`
-        ${Object.keys(shapeExp).map(key =>
-          html`${key == "type"
-          ? html ``
-          : html `<div class="form-check">
-          <input class="form-check-input"
-          type="radio"
-          name="${this.getLastPredicate()}"
-          id="${this.setUuid()}"
-          format="${key}"
-          title="${shapeExp}"
-          checked>
-          <label class="form-check-label" for="${this.getUuid()}">
-          ${key}
-          </label>
-          ${getConstraint(shapeExp)}
-          </div>
-          `}`
-        )
-      }
-      `)}
-      </fieldset>`
-      : html `${constraint.shapeExprs.map(
-        shapeExp => html`${getConstraint(shapeExp)}`
-      )}
-      `
-    }
-    </div>`
-    : html``}
-    ${constraint.nodeKind ?
-      html`${constraint.nodeKind == "literal"?
-      html`
-      <div class="form-group">
-      <!--    <label for="exampleFormControlTextarea1">Example textarea</label>-->
-      <textarea
-      class="form-control"
-      id="exampleFormControlTextarea1"
-      title="${constraint.nodeKind}"
-      placeholder="${constraint.nodeKind}"
-      name="${this.getLastPredicate()}"
-      valueof="${this.getUuid()}"
-      @click="${this.changeRadio}"
-      rows="3"></textarea>
-      ${getMinMax(constraint)}
-      </div>
-      `
-      : html`<input
-      type="text" class="form-control"
-      title="${constraint.nodeKind}"
-      placeholder="${this.localName(constraint.nodeKind)}"
-      name="${this.getLastPredicate()}"
-      valueof="${this.getUuid()}"
-      @click="${this.changeRadio}"
-      value = "${this.getLastPredicate() == 'http://www.w3.org/ns/solid/terms#webid' ? this.webId : ''}"
-      ></input>${getMinMax(constraint)}`
-    }`
+
+  ${getConstraint(shape.constraint)}
+
+  ${shape.style == "regular" ?
+  html `<br><button
+  type="button"
+  class="btn btn-success"
+  @click="${(e) =>this.submitForm()}">
+  <i class="far fa-save"></i>
+  Save ${this.localName(shape.url)}
+  </button>`
+  : html `<br>
+  <button
+  type="button"
+  class="btn btn-primary btn-sm"
+  @click="${(e) =>this.displayForm(shape.url.replace('_Footprint', ''))}">
+  <i class="fas fa-backward"></i>
+  Back to ${this.localName(shape.url.replace('_Footprint', ''))} Form
+  </button>
+  `}
+  </form>
+  </div>
+  `
+
+  const getConstraint = (constraint) => html`
+  ${constraint.type ?
+    html ``
+    :html`type non défini : ${this.toText(constraint)}`
+  }
+  ${this.isFieldset(constraint.type) ?
+    html `<fieldset>
+    <legend><span title="${this.toText(constraint)}">${constraint.type}</span></legend>
+    `
+    :html ``
+  }
+  ${constraint.expression ?
+    html`${getConstraint(constraint.expression)}`
     : html``
   }
-  ${constraint.reference
-    ? html`
-      <select
-    class="custom-select"
-    url="${constraint.reference}"
+  ${constraint.expressions ?
+    html`${constraint.expressions.map(i => html`${getConstraint(i)}`)}`
+    : html``
+  }
+  ${constraint.predicate ?
+    html`<h4
+    title="${this.toText(constraint)}"
+    name="${this.setUuid()}"
+    >${this.setLastPredicate(constraint.predicate)}</h4>`
+    : html``
+  }
+  ${constraint.valueExpr ?
+    html`${getConstraint(constraint.valueExpr)}`
+    : html``
+  }
+  ${constraint.datatype ?
+    html ` <input type="${this.inputType(constraint.datatype)}"
+    class="form-control"
+    title="${constraint.datatype}"
+    name="${this.getLastPredicate()}"
+    valueof="${this.getUuid()}"
+    placeholder="${this.localName(constraint.datatype)}"
+    @click="${this.changeRadio}"
+    value= "${constraint.datatype.endsWith('date') ? this.today : constraint.datatype == 'http://www.w3.org/ns/solid/terms#webid' ? this.webId : ""}">
+    </input>`
+    : html``
+  }
+  ${constraint.shapeExprs
+    ? html`<div title="${this.toText(constraint)}">
+    ${constraint.type == "ShapeOr"
+    ?html `<fieldset class="teal lighten-4"><legend class="teal lighten-4"><h6> Choose one of</h6></legend>
+    ${constraint.shapeExprs.map(
+      shapeExp => html`
+      ${Object.keys(shapeExp).map(key =>
+        html`${key == "type"
+        ? html ``
+        : html `<div class="form-check">
+        <input class="form-check-input"
+        type="radio"
+        name="${this.getLastPredicate()}"
+        id="${this.setUuid()}"
+        format="${key}"
+        title="${shapeExp}"
+        checked>
+        <label class="form-check-label" for="${this.getUuid()}">
+        ${key}
+        </label>
+        ${getConstraint(shapeExp)}
+        </div>
+        `}`
+      )
+    }
+    `)}
+    </fieldset>`
+    : html `${constraint.shapeExprs.map(
+      shapeExp => html`${getConstraint(shapeExp)}`
+    )}
+    `
+  }
+  </div>`
+  : html``}
+  ${constraint.nodeKind ?
+    html`${constraint.nodeKind == "literal"?
+    html`
+    <div class="form-group">
+    <!--    <label for="exampleFormControlTextarea1">Example textarea</label>-->
+    <textarea
+    class="form-control"
+    id="exampleFormControlTextarea1"
+    title="${constraint.nodeKind}"
+    placeholder="${constraint.nodeKind}"
     name="${this.getLastPredicate()}"
     valueof="${this.getUuid()}"
     @click="${this.changeRadio}"
-    placeholder="${this.localName(constraint.reference)}"
-    title="${constraint.reference}"
-    label="${constraint.reference}"
-    >
-    </select>
+    rows="3"></textarea>
+    ${getMinMax(constraint)}
+    </div>
+    `
+    : html`<input
+    type="text" class="form-control"
+    title="${constraint.nodeKind}"
+    placeholder="${this.localName(constraint.nodeKind)}"
+    name="${this.getLastPredicate()}"
+    valueof="${this.getUuid()}"
+    @click="${this.changeRadio}"
+    value = "${this.getLastPredicate() == 'http://www.w3.org/ns/solid/terms#webid' ? this.webId : ''}"
+    ></input>${getMinMax(constraint)}`
+  }`
+  : html``
+}
+${constraint.reference
+  ? html`
+  <select
+  class="custom-select"
+  url="${constraint.reference}"
+  name="${this.getLastPredicate()}"
+  valueof="${this.getUuid()}"
+  @click="${this.changeRadio}"
+  placeholder="${this.localName(constraint.reference)}"
+  title="${constraint.reference}"
+  label="${constraint.reference}"
+  >
+  </select>
 
-    <br>
-    <a href="${constraint.reference}"
-    title="See existing ${this.localName(constraint.reference)} at ${constraint.reference}"
-    target="blank">
-    <i class="far fa-eye"></i> View
-    </a>
-    <a href="#"
-    title="Create a ${constraint.reference}"
-    @click="${(e) =>this.displayForm(constraint.reference)}">
-    <i class="fas fa-plus-circle"></i> Create
-    </a>
-    <br>  `
+  <br>
+  <a href="${constraint.reference}"
+  title="See existing ${this.localName(constraint.reference)} at ${constraint.reference}"
+  target="blank">
+  <i class="far fa-eye"></i> View
+  </a>
+  <a href="#"
+  title="Create a ${constraint.reference}"
+  @click="${(e) =>this.displayForm(constraint.reference)}">
+  <i class="fas fa-plus-circle"></i> Create
+  </a>
+  <br>  `
+  : html``
+}
+${constraint.values
+  ? html`<select class="custom-select"
+  @change="${this.selectorChange}"
+  valueof="${this.getUuid()}"
+  title="${this.toText(constraint)}"
+  name="${this.getLastPredicate()}"
+  placeholder = "value">
+  ${constraint.values.map(i => html`
+    <option value="${i.value||i}"  >${i.value || i}</option>
+    `)}
+    </select>${getMinMax(constraint)}
+    `
     : html``
   }
-  ${constraint.values
-    ? html`<select class="custom-select"
-    @change="${this.selectorChange}"
-    valueof="${this.getUuid()}"
-    title="${this.toText(constraint)}"
-    name="${this.getLastPredicate()}"
-    placeholder = "value">
-    ${constraint.values.map(i => html`
-      <option value="${i.value||i}"  >${i.value || i}</option>
-      `)}
-      </select>${getMinMax(constraint)}
-      `
-      : html``
+  ${this.isFieldset(constraint.type)
+    ? html `</fieldset>`
+    :html ``
+  }
+  `
+
+  return html`
+  <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" >
+  <link href="css/fontawesome/css/all.css" rel="stylesheet">
+  <div class="container">
+
+
+
+  ${this.shape_url != undefined && this.shape_url.length > 0 ?
+    html`<a href="${this.shape_url}" target="_blank">Shape url</a> |
+    <a href="${this.currentShape.url}" target="_blank">Footprint</a> |
+    ${this.webId != null ?
+      html`<a href="${this.webId}" target="_blank">WebId</a>`
+      :html``
     }
-    ${this.isFieldset(constraint.type)
-      ? html `</fieldset>`
+
+    <div class="section" id="forms_section">
+
+    <div  class="row">
+    ${this.shapes.map(i => html`
+      ${i.style == "regular"
+      ? html `
+      <button type="button" class="btn btn-info btn-sm" @click="${(e) =>this.panelClicked(i)}">
+      ${this.localName(i.url)}
+      </button>`
       :html ``
-    }
-    `
+    }`
+  )}
+  </div>
+  </div>
 
-    return html`
-    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" >
-    <link href="css/fontawesome/css/all.css" rel="stylesheet">
-    <div class="container">
+  <div class="divider" id="top_Form"></div>
+  <div >
+  <button type="button" class="btn btn-outline-info btn-sm" @click="${(e) =>this.focus("forms_section")}">Forms</button>
+  <button type="button" class="btn btn-outline-info btn-sm" @click="${(e) =>this.focus("footprints_section")}" >Footprints</button>
+  <div class="divider"></div>
+  <div id="currentShapeDiv"></div>
+  </div>
+  ${this.shapes.map(shape => html`
+    ${getShape(shape)}
+    `)}
 
-
-
-    ${this.shape_url != undefined && this.shape_url.length > 0 ?
-      html`<a href="${this.shape_url}" target="_blank">Shape url</a> |
-      <a href="${this.currentShape.url}" target="_blank">Footprint</a> |
-      ${this.webId != null ?
-        html`<a href="${this.webId}" target="_blank">WebId</a>`
-        :html``
-      }
-
-      <div class="section" id="forms_section">
-
-      <div  class="row">
-      ${this.shapes.map(i => html`
-        ${i.style == "regular"
-        ? html `
-        <button type="button" class="btn btn-info btn-sm" @click="${(e) =>this.panelClicked(i)}">
-        ${this.localName(i.url)}
-        </button>`
-        :html ``
-      }`
-    )}
-    </div>
-    </div>
-
-    <div class="divider" id="top_Form"></div>
-    <div >
-    <button type="button" class="btn btn-outline-info btn-sm" @click="${(e) =>this.focus("forms_section")}">Forms</button>
-    <button type="button" class="btn btn-outline-info btn-sm" @click="${(e) =>this.focus("footprints_section")}" >Footprints</button>
     <div class="divider"></div>
-    <div id="currentShapeDiv"></div>
-    </div>
-    ${this.shapes.map(shape => html`
-      ${getShape(shape)}
-      `)}
+    <div class="section" id="footprints_section">
+    <h5>Footprints</h5>
+    <p>To change the storage location of this data, use the "_Footprint" before submitting</p>
+    <div class="row center-align">
+    ${this.shapes.map(i => html`
+      ${i.style == "footprint"
+      ? html `
+      <button type="button"
+      class="btn btn-outline-primary btn-sm"
+      title="${i.url}"
+      @click="${(e) =>this.panelClicked(i)}"> ${this.localName(i.url)}</button>`
+      : html ``
+    }`
+  )}
+  </div>
+  </div>
+  </div>
+  `
+  :html`
+  <ul>
+  <li>
+  Hello, here you can use some Linked Forms dealing with Holacracy on "Solid Project" platform, prepared just form you, just click on one bottom menu button.
+  </li>
+  <li>
+  You can also use your own shape url to build a form adding
+  "?shape_url=url_to_form" as parameter in the address bar like
+  <a href="${window.location}?shape_url=https://holacratie.solid.community/public/Schema/todo.shex" target="_blank">
+  todo.shex
+  </a>
+  </li>
+  <li>
+  Find <a href="https://holacratie.solid.community/public/Schema/" target="_blank">some more cool examples here</a>
+  </li>
+  </ul>
 
-      <div class="divider"></div>
-      <div class="section" id="footprints_section">
-      <h5>Footprints</h5>
-      <p>To change the storage location of this data, use the "_Footprint" before submitting</p>
-      <div class="row center-align">
-      ${this.shapes.map(i => html`
-        ${i.style == "footprint"
-        ? html `
-        <button type="button"
-        class="btn btn-outline-primary btn-sm"
-        title="${i.url}"
-        @click="${(e) =>this.panelClicked(i)}"> ${this.localName(i.url)}</button>`
-        : html ``
-      }`
-    )}
-    </div>
-    </div>
-    </div>
-    `
-    :html`
-    <ul>
+  `}
+
+  <div id="liste" ?hidden=${this.currentShape != "liste"}>
+  Liste
+  <ul>
+  ${this.liste.map(i => html`
     <li>
-    Hello, here you can use some Linked Forms dealing with Holacracy on "Solid Project" platform, prepared just form you, just click on one bottom menu button.
+    ${decodeURI(i.name)} <a href="${i.url}" target="_blank">link</a>
+   ${this.dataItem(i)}
     </li>
-    <li>
-    You can also use your own shape url to build a form adding
-    "?shape_url=url_to_form" as parameter in the address bar like
-    <a href="${window.location}?shape_url=https://holacratie.solid.community/public/Schema/todo.shex" target="_blank">
-    todo.shex
-    </a>
-    </li>
-    <li>
-    Find <a href="https://holacratie.solid.community/public/Schema/" target="_blank">some more cool examples here</a>
-    </li>
+    `)}
     </ul>
-
-    `}
+    </div>
 
     <shexy-formatter
     name="ShexyFormatter"
@@ -322,6 +350,27 @@ class ShexFormElement extends LitElement {
     ></shexy-formatter>
     `;
   }
+
+
+  async showList(){
+    console.log(this.currentShape.url)
+    this.lastShape = this.currentShape
+    this.currentShape = "liste"
+    let folder = await this.getFilesFrom(this.lastShape.url)
+    console.log(folder.folders)
+    this.liste = folder.folders
+  }
+
+  dataItem(item){
+    let url = item.url+"index.ttl"
+    //decodeURI(item.name);
+    return url
+  }
+
+
+
+
+
 
   firstUpdated(){
     var app = this;
@@ -442,6 +491,12 @@ async parseSchema(schema){
     if(url.endsWith("_Footprint")){
       shap.style = "footprint"
     }
+    if(url.endsWith("_Translate")){
+      shap.style = "translate"
+    }
+    if(url.endsWith("_Meta")){
+      shap.style = "meta"
+    }
     app.shapes = [...app.shapes, shap]
     app.currentShape = app.shapes[0]
     //  this.focus();
@@ -517,13 +572,14 @@ updated(props){
 
 async updateSelects(){
   let selects = this.shadowRoot.querySelectorAll("select")
-  //console.log(selects)
+  console.log(selects)
+  console.log(this.selectFolder)
   for (var select of selects) {
     let url = select.getAttribute("url")
 
     if (select.options.length == 0 && url != null){
       //  console.log("SELECT" , select)
-      console.log("select sans options", url)
+      console.log("select sans options", url, select)
       let folder = this.selectFolder[url]
       //  console.log("FOLDER",folder)
       if (folder == undefined) {
