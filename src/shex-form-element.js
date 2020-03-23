@@ -333,14 +333,11 @@ ${constraint.values
   `}
 
   <div id="liste" ?hidden=${this.currentShape != "liste"}>
-  Liste
-  <ul>
+  <ul class="list-group">
   ${this.liste.map(i => html`
-    <li>
-    ${decodeURI(i.name)} <a href="${i.url}" target="_blank">link</a><br>
-        <item-element .item="${i}">loading</item-element>
+    <li class="list-group-item">
+    <item-element .item="${i}">loading</item-element>
     </li>
-
     `)}
     </ul>
     </div>
@@ -355,6 +352,7 @@ ${constraint.values
 
 
   async showList(){
+    this.liste = []
     console.log(this.currentShape.url)
     this.lastShape = this.currentShape
     this.currentShape = "liste"
@@ -364,61 +362,48 @@ ${constraint.values
   }
 
 
-firstUpdated(){
-  var app = this;
-  this.agent = new HelloAgent(this.name);
-  console.log(this.agent)
-  this.agent.receive = function(from, message) {
-    //  console.log("messah",message)
-    if (message.hasOwnProperty("action")){
-      //  console.log(message)
-      switch(message.action) {
-        case "webIdChanged":
-        app.webIdChanged(message.webId)
-        break;
-        case "fileWriten":
-        app.fileWriten()
-        break;
-        case "shapeUrlChanged":
-        app.load_schema(message.shape_url)
-        break;
-        default:
-        console.log("Unknown action ",message)
+  firstUpdated(){
+    var app = this;
+    this.agent = new HelloAgent(this.name);
+    console.log(this.agent)
+    this.agent.receive = function(from, message) {
+      //  console.log("messah",message)
+      if (message.hasOwnProperty("action")){
+        //  console.log(message)
+        switch(message.action) {
+          case "webIdChanged":
+          app.webIdChanged(message.webId)
+          break;
+          case "fileWriten":
+          app.fileWriten()
+          break;
+          case "shapeUrlChanged":
+          app.load_schema(message.shape_url)
+          break;
+          default:
+          console.log("Unknown action ",message)
+        }
       }
+    };
+
+    let params = this.recupParams()
+    console.log("Params",params)
+    if(params.shape_url != undefined && params.shape_url.length > 0){
+      this.shape_url = params.shape_url
+      this.load_schema(this.shape_url)
     }
-  };
 
-  let params = this.recupParams()
-  console.log("Params",params)
-  if(params.shape_url != undefined && params.shape_url.length > 0){
-    this.shape_url = params.shape_url
-    this.load_schema(this.shape_url)
   }
 
-}
+  fileWriten(){
+    let currentShapeUrl = this.currentShape.url
+    delete(this.selectFolder[currentShapeUrl])
+    if (this.formHistory.length > 0){
+      let precedentShape = this.formHistory.pop()
+      this.currentShape = precedentShape
+      this.focus("top_Form")
+    }
 
-fileWriten(){
-  let currentShapeUrl = this.currentShape.url
-  delete(this.selectFolder[currentShapeUrl])
-  if (this.formHistory.length > 0){
-    let precedentShape = this.formHistory.pop()
-    this.currentShape = precedentShape
-    this.focus("top_Form")
-  }
-
-
-  let selects = this.shadowRoot.querySelectorAll("select")
-  //console.log(selects)
-  for (var select of selects) {
-    let url = select.getAttribute("url")
-
-    if (url == currentShapeUrl){
-      console.log("clear select with ",currentShapeUrl)
-      var i, L = select.options.length - 1;
-      for(i = L; i >= 0; i--) {
-        select.remove(i);
-      }
-    }}
     this.updateSelects()
 
 
@@ -564,27 +549,37 @@ updated(props){
 
 async updateSelects(){
   let selects = this.shadowRoot.querySelectorAll("select")
-  console.log(selects)
-  console.log(this.selectFolder)
+  //console.log(selects)
+
+  //  console.log(selects)
+  //  console.log(this.selectFolder)
+
   for (var select of selects) {
-    let url = select.getAttribute("url")
+      let url = select.getAttribute("url")
+    if ( url != null){
+      var i, L = select.options.length - 1;
+      for(i = L; i >= 0; i--) {
+        select.remove(i);
+      }
+    }
+
 
     if (select.options.length == 0 && url != null){
       //  console.log("SELECT" , select)
-      console.log("select sans options", url, select)
+      //    console.log("select sans options", url, select)
       let folder = this.selectFolder[url]
       //  console.log("FOLDER",folder)
       if (folder == undefined) {
+        this.selectFolder[url] = {}
         folder  = await this.getFilesFrom(url)
         //  console.log("##FILES", folder)
         this.selectFolder[url] = folder
-
       }
       /*  else{
       console.log("I KNOW ", url)
     }*/
     var option = document.createElement("option");
-    option.text = "Choose one "+this.localName(url);
+    option.text = "Choose "+this.localName(url);
     option.value = undefined
     select.add(option);
     folder.folders.forEach((f, i) => {
@@ -593,8 +588,6 @@ async updateSelects(){
       option.value = f.url
       select.add(option);
     });
-
-
   }
 }
 }

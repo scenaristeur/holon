@@ -1,7 +1,7 @@
 import { LitElement, html } from 'lit-element';
 import { HelloAgent } from './agents/hello-agent.js';
-//import { namedNode } from '@rdfjs/data-model';
-import data from "@solid/query-ldflex";
+import { fetchDocument } from 'tripledoc';
+import { foaf, rdfs } from 'rdf-namespaces';
 
 class ItemElement extends LitElement {
 
@@ -9,87 +9,135 @@ class ItemElement extends LitElement {
     return {
       name: {type: String},
       item: {type: Object},
-      predicates: {type: Array},
-      test : {type: String},
-      dateCreated: {type: String}
+      triples : {type: Array},
     };
   }
 
   constructor() {
     super();
     this.item = {}
-    this.predicates = []
-    this.test = "test"
-    this.dateCreated = ""
+    this.triples = []
   }
 
   render(){
     return html`
-    <h4>${decodeURI(this.item.name)}</h4>
-    ${this.item.url}<br>
-    LABEL : ${this.label}<br>
-    TEST : ${this.test}<br>
-    dateCreated : ${this.dateCreated}
-    predicates: ${this.predicates.length} :
-    ${this.predicates.map((i, index) => html`
-      ${index} : ${i}
+    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" >
+    <link href="css/fontawesome/css/all.css" rel="stylesheet">
+    <div class="container-fluid">
+    <table class="table table-dark">
+    <thead>
+    <tr>
+    <th colspan="2" scope="col"><h4>${decodeURI(this.item.name)}</h4> <a href="${this.item.url}" target="_blank">url</a></th>
+    </tr>
+    </thead>
+    <tbody>
+    ${this.triples.map(t => html`
+      <tr>
+      <th scope="row">${this.formatter(t.predicate.id)}</th>
+      <td>${this.formatter(t.object.id)}</td>
+      </tr>
       `)}
-
-
+      </tbody>
+      </table></div>
       `;
     }
 
-    firstUpdated(){
-      var app = this;
-      this.agent = new HelloAgent(this.name);
-      console.log(this.agent)
-      this.agent.receive = function(from, message) {
-        //  console.log("messah",message)
-        if (message.hasOwnProperty("action")){
-          //  console.log(message)
-          switch(message.action) {
-            case "webIdChanged":
-            app.webIdChanged(message.webId)
-            break;
-            default:
-            console.log("Unknown action ",message)
-          }
+    formatter(text){
+      if(text.startsWith('http')){
+        if (text.endsWith('#me')){
+          return html`
+          <a href="${text}" target="_blank">${text}</a>
+          `
+        }else{
+          return html`
+          <a href="${text}" target="_blank">${this.localName(text)}</a>
+          `
         }
-      };
-      this.dataItem()
+
+      }else{
+        return html`${text}`
+      }
     }
 
-    async dataItem(){
-      let url = this.item.url+"index.ttl#this"
-      console.log("URL index",url)
-    //  let predicates = []
-    let dateCreated = await data[url]['https://schema.org/dateCreated']
-    this.dateCreated = `${dateCreated}`
-    /*  for await (const property of data[url].properties){
+
+    localName(uri){
+
+      if(uri.endsWith("/")){
+        uri = uri.slice(0, -1);}
+        var ln = uri;
+        if (uri.lastIndexOf("#") != -1) {
+          ln = uri.substr(uri.lastIndexOf("#")).substr(1)
+        }else{
+          ln = uri.substr(uri.lastIndexOf("/")).substr(1)
+        }
+        return ln
+      }
+
+      firstUpdated(){
+        var app = this;
+        this.agent = new HelloAgent(this.name);
+        console.log(this.agent)
+        this.agent.receive = function(from, message) {
+          //  console.log("messah",message)
+          if (message.hasOwnProperty("action")){
+            //  console.log(message)
+            switch(message.action) {
+              case "webIdChanged":
+              app.webIdChanged(message.webId)
+              break;
+              default:
+              console.log("Unknown action ",message)
+            }
+          }
+        };
+        this.dataItem()
+      }
+
+      async dataItem(){
+        let url = this.item.url+"index.ttl"//#this"
+        const doc = await fetchDocument(url);
+        console.log(doc)
+        let sts = await doc.getStatements()
+        console.log("sta",sts)
+        let triples = await doc.getTriples()
+        console.log("triples",triples)
+        this.triples = triples
+        //const profile = webIdDoc.getSubject('https://www.w3.org/People/Berners-Lee/card#i');
+      }
+
+
+
+      async dataItem1(){
+        let url = this.item.url+"index.ttl#this"
+        console.log("URL index",url)
+        //  let predicates = []
+        let dateCreated = await data[url]['https://schema.org/dateCreated']
+        this.dateCreated = `${dateCreated}`
+        /*  for await (const property of data[url].properties){
         //let val = await data[url][`${property}`]
         //console.log(`${property}`)
-       https://schema.org/name item-element.js:65
-https://schema.org/dateCreated item-element.js:65
-https://schema.org/creator item-element.js:65
-https://schema.org/purpose_raison_d_etre item-element.js:65
-http://www.w3.org/1999/02/22-rdf-syntax-ns#type item-element.js:65
-http://www.w3.org/2000/01/rdf-schema#label item-element.js:65
-http://purl.org/dc/elements/1.1/title
-              }
+        https://schema.org/name item-element.js:65
+        https://schema.org/dateCreated item-element.js:65
+        https://schema.org/creator item-element.js:65
+        https://schema.org/purpose_raison_d_etre item-element.js:65
+        http://www.w3.org/1999/02/22-rdf-syntax-ns#type item-element.js:65
+        http://www.w3.org/2000/01/rdf-schema#label item-element.js:65
+        http://purl.org/dc/elements/1.1/title
+      }
 
-          /*    var prop = await `${property}`
-            predicates[prop] = []
-            let val = await data[url][`${property}`]
-            console.log(`${val}`)
-            //  let value = `${val}`
-            predicates[prop] = [... predicates[prop], val]
-            this.test = val
-            this.predicates = predicates
-            console.log("PREDSSSSS 11",this.predicates)
-            this.requestUpdate()*/
-    //  this.predicates = predicates
-    //  console.log("PREDSSSSS",this.predicates)
-    //  this.requestUpdate()
+      /*    var prop = await `${property}`
+      predicates[prop] = []
+      let val = await data[url][`${property}`]
+      console.log(`${val}`)
+      //  let value = `${val}`
+      predicates[prop] = [... predicates[prop], val]
+      this.test = val
+      this.predicates = predicates
+      console.log("PREDSSSSS 11",this.predicates)
+      this.requestUpdate()*/
+      //  this.predicates = predicates
+      //  console.log("PREDSSSSS",this.predicates)
+      //  this.requestUpdate()
 
       /*
       for await (const val of data[url][`${prop}`]){

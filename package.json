@@ -30,6 +30,8 @@
     "webpack-dev-server": "^3.10.3"
   },
   "dependencies": {
-    "@solid/query-ldflex": "^2.10.0"
+    "@solid/query-ldflex": "^2.10.0",
+    "rdf-namespaces": "^1.8.0",
+    "tripledoc": "^4.3.0"
   }
 }
