@@ -2,6 +2,7 @@ import { LitElement, html } from 'lit-element';
 import { HelloAgent } from './agents/hello-agent.js';
 import './shexy-formatter.js'
 import * as auth from 'solid-auth-client';
+import './item-element.js'
 
 class ShexFormElement extends LitElement {
 
@@ -336,9 +337,10 @@ ${constraint.values
   <ul>
   ${this.liste.map(i => html`
     <li>
-    ${decodeURI(i.name)} <a href="${i.url}" target="_blank">link</a>
-   ${this.dataItem(i)}
+    ${decodeURI(i.name)} <a href="${i.url}" target="_blank">link</a><br>
+        <item-element .item="${i}">loading</item-element>
     </li>
+
     `)}
     </ul>
     </div>
@@ -361,114 +363,104 @@ ${constraint.values
     this.liste = folder.folders
   }
 
-  dataItem(item){
-    let url = item.url+"index.ttl"
-    //decodeURI(item.name);
-    return url
+
+firstUpdated(){
+  var app = this;
+  this.agent = new HelloAgent(this.name);
+  console.log(this.agent)
+  this.agent.receive = function(from, message) {
+    //  console.log("messah",message)
+    if (message.hasOwnProperty("action")){
+      //  console.log(message)
+      switch(message.action) {
+        case "webIdChanged":
+        app.webIdChanged(message.webId)
+        break;
+        case "fileWriten":
+        app.fileWriten()
+        break;
+        case "shapeUrlChanged":
+        app.load_schema(message.shape_url)
+        break;
+        default:
+        console.log("Unknown action ",message)
+      }
+    }
+  };
+
+  let params = this.recupParams()
+  console.log("Params",params)
+  if(params.shape_url != undefined && params.shape_url.length > 0){
+    this.shape_url = params.shape_url
+    this.load_schema(this.shape_url)
+  }
+
+}
+
+fileWriten(){
+  let currentShapeUrl = this.currentShape.url
+  delete(this.selectFolder[currentShapeUrl])
+  if (this.formHistory.length > 0){
+    let precedentShape = this.formHistory.pop()
+    this.currentShape = precedentShape
+    this.focus("top_Form")
   }
 
 
+  let selects = this.shadowRoot.querySelectorAll("select")
+  //console.log(selects)
+  for (var select of selects) {
+    let url = select.getAttribute("url")
 
-
-
-
-  firstUpdated(){
-    var app = this;
-    this.agent = new HelloAgent(this.name);
-    console.log(this.agent)
-    this.agent.receive = function(from, message) {
-      //  console.log("messah",message)
-      if (message.hasOwnProperty("action")){
-        //  console.log(message)
-        switch(message.action) {
-          case "webIdChanged":
-          app.webIdChanged(message.webId)
-          break;
-          case "fileWriten":
-          app.fileWriten()
-          break;
-          case "shapeUrlChanged":
-          app.load_schema(message.shape_url)
-          break;
-          default:
-          console.log("Unknown action ",message)
-        }
+    if (url == currentShapeUrl){
+      console.log("clear select with ",currentShapeUrl)
+      var i, L = select.options.length - 1;
+      for(i = L; i >= 0; i--) {
+        select.remove(i);
       }
-    };
+    }}
+    this.updateSelects()
 
-    let params = this.recupParams()
-    console.log("Params",params)
-    if(params.shape_url != undefined && params.shape_url.length > 0){
-      this.shape_url = params.shape_url
-      this.load_schema(this.shape_url)
-    }
 
   }
 
-  fileWriten(){
-    let currentShapeUrl = this.currentShape.url
-    delete(this.selectFolder[currentShapeUrl])
-    if (this.formHistory.length > 0){
-      let precedentShape = this.formHistory.pop()
-      this.currentShape = precedentShape
-      this.focus("top_Form")
+  recupParams(){
+    //console.log(window.location)
+    var url = window.location.search+window.location.hash;  // pour catcher les /card#me
+    var params = (function(a) {
+      if (a == "") return {};
+      var b = {};
+      for (var i = 0; i < a.length; ++i)
+      {        var p=a[i].split('=', 2);
+      if (p.length == 1)
+      b[p[0]] = "";
+      else
+      b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
     }
+    return b;
+  })(url.substr(1).split('&'));
+  return params;
+}
 
 
-    let selects = this.shadowRoot.querySelectorAll("select")
-    //console.log(selects)
-    for (var select of selects) {
-      let url = select.getAttribute("url")
+load_schema(shape_url){
+  let app = this
+  this.shape_url = shape_url
+  console.log(shape_url)
 
-      if (url == currentShapeUrl){
-        console.log("clear select with ",currentShapeUrl)
-        var i, L = select.options.length - 1;
-        for(i = L; i >= 0; i--) {
-          select.remove(i);
-        }
-      }}
-      this.updateSelects()
-
-
+  this.shex.Loader.load([shape_url], [], [], []).then(loaded => {
+    if (loaded.schema){
+      console.log("LOADED",loaded.schema)
+      //  app.schema = JSON.stringify(loaded.schema);
+      app.parseSchema(loaded.schema)
+      //  console.log(Object.entries(loaded.schema.shapes))
     }
-
-    recupParams(){
-      //console.log(window.location)
-      var url = window.location.search+window.location.hash;  // pour catcher les /card#me
-      var params = (function(a) {
-        if (a == "") return {};
-        var b = {};
-        for (var i = 0; i < a.length; ++i)
-        {        var p=a[i].split('=', 2);
-        if (p.length == 1)
-        b[p[0]] = "";
-        else
-        b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
-      }
-      return b;
-    })(url.substr(1).split('&'));
-    return params;
+  }, err => {
+    //  log(err, "ERROR loadShex")
+    console.log("erreur ",err)
+    alert(err.message)
   }
-
-
-  load_schema(shape_url){
-    let app = this
-    this.shape_url = shape_url
-    console.log(shape_url)
-
-    this.shex.Loader.load([shape_url], [], [], []).then(loaded => {
-      if (loaded.schema){
-        console.log("LOADED",loaded.schema)
-        //  app.schema = JSON.stringify(loaded.schema);
-        app.parseSchema(loaded.schema)
-        //  console.log(Object.entries(loaded.schema.shapes))
-      }
-    }, err => {
-      //  log(err, "ERROR loadShex")
-      console.log("erreur ",err)
-      alert(err.message)
-    }
-  );
+);
 }
 
 async parseSchema(schema){
