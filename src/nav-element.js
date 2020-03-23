@@ -50,12 +50,13 @@ class NavElement extends LitElement {
       color: white;
     }
     </style>
-      <div class="navbar">
+    <div class="navbar">
+    <button type="button" class="btn btn-info btn-sm" name="organization" @click="${this.menuChanged}">Organization <i name="organization" class="far fa-handshake"></i></button>
+    <button type="button" class="btn btn-info btn-sm" name="user" @click="${this.menuChanged}">User <i name="user" class="fas fa-user"></i></button>
     <button type="button" class="btn btn-info btn-sm" name="tension" @click="${this.menuChanged}">Tension <i name="tension" class="fas fa-bolt"></i></button>
-    <button type="button" class="btn btn-secondary btn-sm" name="todo" @click="${this.menuChanged}">Todo <i name="todo" class="fas fa-clipboard-list"></i></button>
+    <button type="button" class="btn btn-info btn-sm" name="todo" @click="${this.menuChanged}">Todo <i name="todo" class="fas fa-clipboard-list"></i></button>
     <button type="button" class="btn btn-info btn-sm" name="role" @click="${this.menuChanged}">Role <i name="role" class="fas fa-hat-cowboy-side"></i></button>
-    <button type="button" class="btn btn-secondary btn-sm" name="circle" @click=${this.menuChanged}>Cercle <i name="circle" class="fas fa-users"></i></button>
-    <button type="button" class="btn btn-info btn-sm" name="governance" @click="${this.menuChanged}">Gouvernance <i name="governance" class="far fa-handshake"></i></button>
+    <button type="button" class="btn btn-info btn-sm" name="circle" @click=${this.menuChanged}>Cercle <i name="circle" class="fas fa-users"></i></button>
     <a href="https://labdsurlholacracy.com/flipbook-fullscreen/#page-28-29" target="_blank">
     <button type="button" class="btn btn-danger btn-sm">WTF <i class="fab fa-think-peaks"></i></button></a>
     </div>
@@ -84,15 +85,11 @@ class NavElement extends LitElement {
 
   menuChanged(e){
     var app = this
-    console.log(e.target)
-    console.log(e.target.name)
-    this.menu=e.target.name
-    let menus = this.shadowRoot.querySelectorAll(".navbar a")
-    menus.forEach((m, i) => {
+    this.menu=e.target.getAttribute("name")
+    this.shadowRoot.querySelectorAll(".navbar a").forEach((m, i) => {
       m.name == app.menu ? m.classList.add("active") : m.classList.remove("active")
     });
-    //  console.log(this.destinataire)
-    this.agent.send(this.destinataire, {action:"menuChanged", menu: e.target.name});
+    this.agent.send(this.destinataire, {action:"menuChanged", menu: this.menu});
   }
 
   webIdChanged(webId){

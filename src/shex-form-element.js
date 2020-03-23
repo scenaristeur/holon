@@ -63,7 +63,7 @@ class ShexFormElement extends LitElement {
     ${getConstraint(shape.constraint)}
 
     ${shape.style == "regular" ?
-    html `<button
+    html `<br><button
     type="button"
     class="btn btn-success"
     @click="${(e) =>this.submitForm()}">
@@ -119,7 +119,7 @@ class ShexFormElement extends LitElement {
       title="${constraint.datatype}"
       name="${this.getLastPredicate()}"
       valueof="${this.getUuid()}"
-      placeholder="${constraint.datatype}"
+      placeholder="${this.localName(constraint.datatype)}"
       @click="${this.changeRadio}"
       value= "${constraint.datatype.endsWith('date') ? this.today : constraint.datatype == 'http://www.w3.org/ns/solid/terms#webid' ? this.webId : ""}">
       </input>`
@@ -179,7 +179,7 @@ class ShexFormElement extends LitElement {
       : html`<input
       type="text" class="form-control"
       title="${constraint.nodeKind}"
-      placeholder="${constraint.nodeKind}"
+      placeholder="${this.localName(constraint.nodeKind)}"
       name="${this.getLastPredicate()}"
       valueof="${this.getUuid()}"
       @click="${this.changeRadio}"
@@ -190,24 +190,13 @@ class ShexFormElement extends LitElement {
   }
   ${constraint.reference
     ? html`
-    <!--
-    <input type="text" class="validate teal lighten-5"
-    placeholder="${constraint.reference}"
-    title="${constraint.reference}"
-    label="${constraint.reference}"
-    value="${constraint.reference}"
-    name="${this.getLastPredicate()}"
-    valueof="${this.getUuid()}"
-    @click="${this.changeRadio}"
-    ></input>
-    -->
-    <select
+      <select
     class="custom-select"
     url="${constraint.reference}"
     name="${this.getLastPredicate()}"
     valueof="${this.getUuid()}"
     @click="${this.changeRadio}"
-    placeholder="${constraint.reference}"
+    placeholder="${this.localName(constraint.reference)}"
     title="${constraint.reference}"
     label="${constraint.reference}"
     >
@@ -461,6 +450,7 @@ async parseSchema(schema){
   await   this.requestUpdate()
   console.log("updated")
   await this.updateSelects()
+  this.focus("currentShapeDiv")
 }
 
 submitForm(){
@@ -517,6 +507,7 @@ jsonFromForm(id){
 }
 
 updated(props){
+  console.log("LITHTML UPDATED")
   /*let selects = this.shadowRoot.querySelectorAll("select")
   if (selects.length > 0){
   this.updateSelects()
@@ -532,26 +523,28 @@ async updateSelects(){
 
     if (select.options.length == 0 && url != null){
       //  console.log("SELECT" , select)
+      console.log("select sans options", url)
       let folder = this.selectFolder[url]
       //  console.log("FOLDER",folder)
       if (folder == undefined) {
         folder  = await this.getFilesFrom(url)
         //  console.log("##FILES", folder)
         this.selectFolder[url] = folder
-        var option = document.createElement("option");
-        option.text = "Choose one "+this.localName(url);
-        option.value = undefined
-        select.add(option);
-        folder.folders.forEach((f, i) => {
-          var option = document.createElement("option");
-          option.text = f.name;
-          option.value = f.url
-          select.add(option);
-        });
+
       }
       /*  else{
       console.log("I KNOW ", url)
     }*/
+    var option = document.createElement("option");
+    option.text = "Choose one "+this.localName(url);
+    option.value = undefined
+    select.add(option);
+    folder.folders.forEach((f, i) => {
+      var option = document.createElement("option");
+      option.text = f.name;
+      option.value = f.url
+      select.add(option);
+    });
 
 
   }

@@ -78,6 +78,8 @@ class ShexyFormatter extends LitElement {
           }
           //console.log(predicate, object);
           let objectValue = object.value.startsWith("http") ? '<'+object.value+'>': '"'+object.value+'"';
+objectValue = objectValue.replace(/\n/gm,'#xA '); // retour a la ligne , new line #xD = carriage return https://www.w3.org/TR/turtle/
+
           ttlString += ':this  <'+predicate+'>  '+objectValue+'.  # Format :'+object.type+ " "+object.format+ "\n";
         }
       }

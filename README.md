@@ -29,6 +29,8 @@ https://github.com/inrupt/solid-sdk-forms
 
 https://github.com/ericprud/shex-form/blob/master/index.js#L152
 
+https://github.com/shexSpec/shex/wiki/ShEx
+
 https://solid.github.io/form-playground/playground.html?uri=https%3A%2F%2Fwww.w3.org%2FPeople%2FBerners-Lee%2Fcard%23i&subject=https%3A%2F%2Fwww.w3.org%2FPeople%2FBerners-Lee%2Fcard%23i&form=https%3A%2F%2Ftimbl.com%2Ftimbl%2FPublic%2FTest%2FForms%2FindividualForm.ttl%23individualForm-byId
 
 https://github.com/inrupt/solid-react-components
