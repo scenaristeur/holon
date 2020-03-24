@@ -24,10 +24,11 @@ class ItemElement extends LitElement {
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" >
     <link href="css/fontawesome/css/all.css" rel="stylesheet">
     <div class="container-fluid">
-    <table class="table table-dark">
+    <table class="table table-dark table-striped">
     <thead>
     <tr>
-    <th colspan="2" scope="col"><h4>${decodeURI(this.item.name)}</h4> <a href="${this.item.url}" target="_blank">url</a></th>
+    <th colspan="2" scope="col"><h4>${decodeURI(this.item.name)}</h4>
+     <a href="${this.item.url+"index.ttl"}" class="text-secondary" target="_blank"><small>${this.item.url+"index.ttl"}</small></a></th>
     </tr>
     </thead>
     <tbody>
@@ -44,13 +45,13 @@ class ItemElement extends LitElement {
 
     formatter(text){
       if(text.startsWith('http')){
-        if (text.endsWith('#me')){
+        if (text.endsWith('#meA')){
           return html`
-          <a href="${text}" target="_blank">${text}</a>
+          <a href="${text}" class="text-info" target="_blank">${text}</a>
           `
         }else{
           return html`
-          <a href="${text}" target="_blank">${this.localName(text)}</a>
+          <a href="${text}"  class="text-info" target="_blank">${this.localName(text)}</a>
           `
         }
 
